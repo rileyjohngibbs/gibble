@@ -253,7 +253,7 @@ def create_app():
         TIMELIMIT = dt.timedelta(minutes=3, seconds=10)
         complete = (
             game_player.started_at is not None
-            and game_player.started_at < TIMELIMIT
+            and dt.datetime.now() - game_player.started_at > TIMELIMIT
         )
         words = (
             db.session.query(
