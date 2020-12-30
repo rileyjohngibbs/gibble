@@ -6,7 +6,10 @@ from flask import Flask, g, jsonify, request, send_from_directory, url_for
 
 def create_app():
     app = Flask(__name__, static_url_path='')
-    app.config['SQLALCHEMY_DATABASE_URI'] = getenv('DATABASE_URL', 'sqlite:///gibble.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = getenv(
+        'DATABASE_URL',
+        'sqlite:///gibble.db',
+    )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     from gibble.models import Game, GamePlayer, User, Word, WordRejection, db
@@ -83,12 +86,16 @@ def create_app():
             .filter(GamePlayer.user_id == g.user.id)
             .all()
         )
+        timelimit = dt.datetime.now() - dt.timedelta(minutes=3)
         return {
             'games': [
                 {
                     'id': gp.game.id,
                     'created_at': gp.game.created_at,
-                    'played': bool(gp.started_at),
+                    'played': (
+                        gp.started_at is not None
+                        and gp.started_at < timelimit
+                    ),
                     'players': [
                         {'id': gp_.user.id, 'username': gp_.user.username}
                          for gp_ in gp.game.game_players
@@ -180,7 +187,10 @@ def create_app():
             .first()
         ) is not None
         if not challenge_exists:
-            opponent_game_player = GamePlayer(user_id=opponent.id, game_id=game_id)
+            opponent_game_player = GamePlayer(
+                user_id=opponent.id,
+                game_id=game_id,
+            )
             db.session.add(opponent_game_player)
             db.session.commit()
         return {'id': opponent.id, 'username': opponent.username}
@@ -238,8 +248,12 @@ def create_app():
         game_player = (
             db.session.query(GamePlayer)
             .filter_by(game_id=game_id, user_id=g.user.id)
-            .filter(GamePlayer.started_at.isnot(None))
             .first_or_404()
+        )
+        TIMELIMIT = dt.timedelta(minutes=3, seconds=10)
+        complete = (
+            game_player.started_at is not None
+            and game_player.started_at < TIMELIMIT
         )
         words = (
             db.session.query(

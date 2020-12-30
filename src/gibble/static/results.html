@@ -46,7 +46,8 @@
         body.innerHTML = tableBody.join('\n')
         table.appendChild(header)
         table.appendChild(body)
-        wordsList.replaceChildren(table)
+        wordsList.innerHTML = ''
+        wordsList.appendChild(table)
       }
 
       client.getWords(urlGameId, (response) => {

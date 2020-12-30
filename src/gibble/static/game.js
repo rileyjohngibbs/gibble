@@ -31,44 +31,17 @@ if (!Array.prototype.equals) {
 
 class Game {
 
-  static alphabet = [
-    'A', 'B', 'C', 'D', 'E',
-    'F', 'G', 'H', 'I', 'J',
-    'K', 'L', 'M', 'N', 'O',
-    'P', 'Q', 'R', 'S', 'T',
-    'U', 'V', 'W', 'X', 'Y', 'Z',
-  ];
-
-  static dice = [
-    'AACIOT',
-    'ABILTY',
-    'ABJMOQ',
-    'ACDEMP',
-    'ACELRS',
-    'ADENVZ',
-    'AHMORS',
-    'BIFORX',
-    'DENOSW',
-    'DKNOTU',
-    'EEFHIY',
-    'EGKLUY',
-    'EGINTV',
-    'EHINPS',
-    'ELPSTU',
-    'GILRUW',
-  ]
-
-  static duration = 3 * 60 * 1000
-
   constructor(endCallback) {
-    this.board = new Board(this.generateBoard())
+    this.duration = 3 * 60 * 1000
+    const grid = Array(4).fill(0).map(() => Array(4).fill('A'))
+    this.board = new Board(grid)
     this.words = []
     this.active = true
     this.endCallback = endCallback ? endCallback : () => {}
     setTimeout(() => {
       this.endCallback()
       this.active = false
-    }, Game.duration)
+    }, this.duration)
   }
 
   submitWord(word) {
@@ -77,23 +50,6 @@ class Game {
       && this.words.indexOf(word) < 0
     if (valid) { this.words.push(word) }
     return valid
-  }
-
-  generateBoard() {
-    let dicePool = [...Game.dice]
-    const size = Math.sqrt(Game.dice.length)
-    const rows = Array(size).fill().map(
-      () => Array(size).fill().map(
-        () => {
-          const index = Math.round(Math.random() * dicePool.length - 0.5)
-          const pluckedDie = dicePool[index]
-          dicePool = dicePool.filter((d, i) => i !== index)
-          const side = Math.round(Math.random() * pluckedDie.length - 0.5)
-          return pluckedDie[side]
-        }
-      )
-    )
-    return rows
   }
 
   render() {
