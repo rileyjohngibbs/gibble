@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Gibble</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+      .section {
+        margin: 2em 1em;
+      }
+      #words-list td {
+        padding: 0.5em;
+        max-width: 10em;
+      }
+      #words-list th {
+        padding: 0.5em;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="section">
+      <h1>Gibble</h1>
+      <h2>Results: Game <span id="game-id"></span></h2>
+    </div>
+    <div id="words-list" class="section">
+    </div>
+    <script src="./api.js"></script>
+    <script>
+      const client = new Client()
+      const wordsList = document.querySelector('#words-list')
+      let urlGameId = new URL(window.location.href).searchParams.get('gameId')
+
+      document.querySelector('#game-id').innerText = urlGameId
+
+      const updateWords = (wordCounts) => {
+        const tableBody = Object.keys(wordCounts).map((word) => {
+          return `<tr>`
+            + `<td>${word}</td>`
+            + `<td>${wordCounts[word].users.map(u => u.username).join(', ')}</td>`
+            + `</tr>`
+        })
+        let table = document.createElement('table')
+        let header = document.createElement('thead')
+        header.innerHTML = '<tr><th>Word</th><th>Played By</th><th>Vetoed By</th></tr>'
+        let body = document.createElement('tbody')
+        body.innerHTML = tableBody.join('\n')
+        table.appendChild(header)
+        table.appendChild(body)
+        wordsList.replaceChildren(table)
+      }
+
+      client.getWords(urlGameId, (response) => {
+        let wordCounts = {}
+        response.words.forEach((word) => {
+          if (!wordCounts[word.word]) wordCounts[word.word] = {'users': []}
+          const user = response.users.filter(user => user.id === word.user_id)[0]
+          wordCounts[word.word].users.push(user)
+        })
+        updateWords(wordCounts)
+      })
+    </script>
+  </body>
+</html>

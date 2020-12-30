@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Gibble</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+      .section {
+        margin: 2em 1em;
+      }
+      .found-word {
+        height: 2em;
+        line-height: 2em;
+      }
+      .die {
+        height: 2em;
+        width: 2em;
+        text-align: center;
+        float: left;
+      }
+      .row {
+        height: 2em;
+      }
+      #game-id {
+        font-size: small;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="./game.js"></script>
+    <script src="./api.js"></script>
+    <div id="title" class="section">
+      <h1>Gibble</h1>
+    </div>
+    <div id="game" class="section">
+      <div id="board">
+      </div>
+      <div id="game-id">
+      </div>
+      <div id="entry">
+        <input type="text" id="wordentry" onkeypress="entryKey()">
+        <button onclick="submit()">Submit</button>
+      </div>
+      <div id="wordlist">
+      </div>
+    </div>
+    <script>
+      const wordEntry = document.querySelector('#wordentry');
+      const wordList = document.querySelector('#wordlist');
+      const client = new Client();
+      let game = null
+
+      const joinGame = (game_id) => {
+        client.joinGame(game_id, (apiGame) => {
+          game = new Game(() => {
+            for (let ele of document.querySelector('#entry').children) {
+              ele.setAttribute('disabled', true)
+            }
+            client.submitWords(game_id, game.words, () => {})
+          });
+          game.board.grid = apiGame.grid;
+          document.querySelector('#board').innerHTML = game.render();
+          document.querySelector('#game-id').innerHTML = `Game ID: ${game_id}`;
+          wordEntry.focus();
+        });
+      }
+
+      let urlGameId = new URL(window.location.href).searchParams.get('gameId')
+      if (urlGameId !== null) {
+        joinGame(urlGameId)
+      } else {
+        client.newGame((resp) => window.location.href = `game.html?gameId=${resp.id}`)
+      }
+
+      function submit() {
+        const word = wordEntry.value.toUpperCase();
+        const valid = game.submitWord(word);
+        if (valid) {
+          client.submitWords(urlGameId, [word], () => {})
+          const newWordDiv = document.createElement('div');
+          newWordDiv.className = 'found-word';
+          newWordDiv.innerText = word;
+          wordList.appendChild(newWordDiv);
+        } else {
+          wordEntry.style.backgroundColor = 'pink'
+          setTimeout(() => wordEntry.style.backgroundColor = null, 250)
+        }
+        wordEntry.value = '';
+      }
+
+      function entryKey() {
+        if (event.key === 'Enter') {
+          submit()
+        }
+      }
+    </script>
+  </body>
+</html>
