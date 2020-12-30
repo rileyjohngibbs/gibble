@@ -106,7 +106,9 @@ class Board {
       .filter(
         (t) => path.all((p) => !t.equals(p))
       )
-    return nextTiles.map((t) => [...path, t])
+    return nextTiles.length > 0
+      ? nextTiles.map((t) => [...path, t])
+      : [[...path, [-1, -1]]]
   }
 
   getNeighbors(y, x) {
