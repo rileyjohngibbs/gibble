@@ -2,7 +2,7 @@ import datetime as dt
 from os import getenv
 from random import randint, shuffle
 
-from flask import Flask, g, jsonify, request, send_from_directory, url_for
+from flask import Flask, g, jsonify, redirect, request, send_from_directory
 
 def create_app():
     app = Flask(__name__, static_url_path='')
@@ -25,6 +25,10 @@ def create_app():
         else:
             user = None
         g.user = user
+
+    @app.route('/', methods=['GET'])
+    def reroute():
+        return redirect('/menu.html', code=302)
 
     @app.route('/login', methods=['POST'])
     def login():
