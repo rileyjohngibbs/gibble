@@ -274,10 +274,10 @@ def create_app():
             .all()
         )
         return {
-            'words': [
+            'words': complete and [
                 {'word': word.word, 'user_id': word.user_id}
                 for word in words
-            ],
+            ] or [],
             'users': [
                 {'id': user.id, 'username': user.username}
                 for user in users
