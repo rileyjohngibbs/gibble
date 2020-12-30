@@ -1,11 +1,12 @@
 import datetime as dt
+from os import getenv
 from random import randint, shuffle
 
 from flask import Flask, g, jsonify, request, send_from_directory, url_for
 
 def create_app():
     app = Flask(__name__, static_url_path='')
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gibble.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = getenv('DATABASE_URL', 'sqlite:///gibble.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     from gibble.models import Game, GamePlayer, User, Word, WordRejection, db
