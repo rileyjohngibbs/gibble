@@ -4,6 +4,8 @@ from random import randint, shuffle
 
 from flask import Flask, g, jsonify, redirect, request, send_from_directory
 
+from gibble.helpers import make_grid_array
+
 def create_app():
     app = Flask(__name__, static_url_path='')
     app.config['SQLALCHEMY_DATABASE_URI'] = getenv(
@@ -119,9 +121,7 @@ def create_app():
             .first_or_404()
         )
         flat_grid = game_player.game.grid
-        grid = [[None] * 4 for _ in range(4)]
-        for i, letter in enumerate(flat_grid):
-            grid[i // 4][i % 4] = letter
+        grid = make_grid_array(flat_grid)
         game_player.started_at = dt.datetime.now()
         db.session.commit()
         return {'grid': grid}
