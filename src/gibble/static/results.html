@@ -67,7 +67,12 @@
       const updateWords = (wordCounts) => {
         let table = document.createElement('table')
         let header = document.createElement('thead')
-        header.innerHTML = '<tr><th>Word</th><th>Played By</th><th>Vetoed By</th></tr>'
+        header.innerHTML = '<tr>'
+          + '<th>Word</th>'
+          + '<th>Points</th>'
+          + '<th>Played By</th>'
+          + '<th>Vetoed By</th>'
+          + '</tr>'
         let body = document.createElement('tbody')
         const sortedWords = Object.keys(wordCounts).sort((a, b) => b.length - a.length)
         const tableBody = sortedWords.forEach((word) => {
@@ -75,6 +80,9 @@
           const wordCell = document.createElement('td')
           wordCell.textContent = `${word}`
           row.appendChild(wordCell)
+          const pointsCell = document.createElement('td')
+          pointsCell.textContent = `${wordCounts[word].score}`
+          row.appendChild(pointsCell)
           const playedCell = document.createElement('td')
           playedCell.textContent = `${wordCounts[word].users.map(u => u.username).join(', ')}`
           row.appendChild(playedCell)
@@ -89,7 +97,7 @@
       client.getSingleGame(urlGameId, (response) => {
         let wordCounts = {}
         response.words.forEach((word) => {
-          if (!wordCounts[word.word]) wordCounts[word.word] = {'users': []}
+          if (!wordCounts[word.word]) wordCounts[word.word] = {'users': [], 'score': word.score}
           const user = response.users.filter(user => user.id === word.user_id)[0]
           wordCounts[word.word].users.push(user)
         })
