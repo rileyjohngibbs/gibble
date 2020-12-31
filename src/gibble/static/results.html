@@ -62,7 +62,7 @@
         wordsList.appendChild(table)
       }
 
-      client.getWords(urlGameId, (response) => {
+      client.getSingleGame(urlGameId, (response) => {
         let wordCounts = {}
         response.words.forEach((word) => {
           if (!wordCounts[word.word]) wordCounts[word.word] = {'users': []}

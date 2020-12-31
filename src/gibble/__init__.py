@@ -126,7 +126,7 @@ def create_app():
         db.session.commit()
         return {'grid': grid}
 
-    @app.route('/games/<int:game_id>', methods=['POST'])
+    @app.route('/games/<int:game_id>', methods=['GET'])
     def get_single_game(game_id):
         if g.user is None:
             return {'error': 'Missing user_id'}, 401
@@ -147,23 +147,31 @@ def create_app():
             .filter(Game.id == game_id)
             .first()
         )
-        players = [
+        users = [
             {'id': gp.user.id, 'username': gp.user.username}
             for gp in game.game_players
         ]
         words = has_played and [
-            {'word': gp.word.word, 'user_id': gp.user.id}
+            {'word': word.word, 'user_id': gp.user.id}
             for gp in game.game_players
+            for word in gp.words
         ] or []
         vetoes = has_played and [
-            {'word': gp.word_rejections.word, 'user_id': gp.user.id}
+            {'word': rejection.word, 'user_id': gp.user.id}
             for gp in game.game_players
+            for rejection in gp.word_rejections
         ] or []
+        grid = (
+            has_played
+            and make_grid_array(game.grid)
+            or make_grid_array('?' * 16)
+        )
         return {
             'id': game.id,
+            'grid': grid,
             'played': has_played,
             'created_at': game.created_at,
-            'players': players,
+            'users': users,
             'words': words,
             'vetoes': vetoes,
         }

@@ -59,4 +59,4 @@ class WordRejection(db.Model):
         db.ForeignKey('game_player.id'),
         primary_key=True,
     )
-    db.relationship('GamePlayer', lazy=True, backref='word_rejections')
+    game_player = db.relationship('GamePlayer', lazy=True, backref='word_rejections')
