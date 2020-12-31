@@ -4,7 +4,7 @@ from random import randint, shuffle
 
 from flask import Flask, g, jsonify, redirect, request, send_from_directory
 
-from gibble.helpers import make_grid_array
+from gibble.helpers import make_grid_array, score_game, score_word
 
 def create_app():
     app = Flask(__name__, static_url_path='')
@@ -152,10 +152,15 @@ def create_app():
             for gp in game.game_players
         ]
         words = has_played and [
-            {'word': word.word, 'user_id': gp.user.id}
+            {
+                'word': word.word,
+                'user_id': gp.user.id,
+                'score': score_word(word.word),
+            }
             for gp in game.game_players
             for word in gp.words
         ] or []
+        player_scores = score_game(words)
         vetoes = has_played and [
             {'word': rejection.word, 'user_id': gp.user.id}
             for gp in game.game_players
@@ -173,6 +178,7 @@ def create_app():
             'created_at': game.created_at,
             'users': users,
             'words': words,
+            'scores': player_scores,
             'vetoes': vetoes,
         }
 
