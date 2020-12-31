@@ -61,17 +61,19 @@
       const client = new Client();
       let game = null
 
-      const joinGame = (game_id) => {
-        client.joinGame(game_id, (apiGame) => {
+      const joinGame = (gameId) => {
+        client.joinGame(gameId, (apiGame) => {
           game = new Game(() => {
             for (let ele of document.querySelector('#entry').children) {
               ele.setAttribute('disabled', true)
             }
-            client.submitWords(game_id, game.words, () => {})
+            client.submitWords(gameId, game.words, () => {
+              setTimeout(() => { window.location.href = `results.html?gameId=${gameId}` }, 3000)
+            })
           });
           game.board.grid = apiGame.grid;
           document.querySelector('#board').innerHTML = game.render();
-          document.querySelector('#game-id').innerHTML = `Game ID: ${game_id}`;
+          document.querySelector('#game-id').innerHTML = `Game ID: ${gameId}`;
           wordEntry.focus();
         });
       }

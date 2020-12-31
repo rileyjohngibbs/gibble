@@ -122,8 +122,9 @@ def create_app():
         )
         flat_grid = game_player.game.grid
         grid = make_grid_array(flat_grid)
-        game_player.started_at = dt.datetime.now()
-        db.session.commit()
+        if game_player.started_at is None:
+            game_player.started_at = dt.datetime.now()
+            db.session.commit()
         return {'grid': grid}
 
     @app.route('/games/<int:game_id>', methods=['GET'])
