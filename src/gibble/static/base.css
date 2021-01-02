@@ -1,0 +1,38 @@
+a:link {
+  text-decoration: none;
+}
+a:visited {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+a:active {
+  text-decoration: underline;
+}
+.section {
+  margin: 2em 1em;
+}
+.disabled {
+  color: grey;
+}
+.game-row {
+  padding: 1em;
+  margin: 0.5em;
+  float: left;
+  border: 1px solid gray;
+}
+.game-date {
+  font-size: small;
+}
+#login-status {
+  margin: 1em 0em;
+  font-weight: bold;
+}
+#games {
+  position: absolute;
+}
+#newGameButton {
+  padding: 1em;
+  background-color: #eee;
+}
