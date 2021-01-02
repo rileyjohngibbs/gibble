@@ -137,7 +137,7 @@ def create_app():
             .filter_by(user_id=g.user.id, game_id=game_id)
             .first_or_404()
         )
-        has_played = game_player.started_at is not None
+        has_played = game_player.has_played
         base_join = db.joinedload(Game.game_players)
         joins = (
             (base_join.joinedload(GamePlayer.user),)
