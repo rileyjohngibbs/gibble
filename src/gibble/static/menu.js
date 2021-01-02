@@ -6,10 +6,10 @@ class LoadedGames {
   }
 
   mostRecentSort(a, b) {
-    if (a.created_at < b.created_at) {
-      return -1
-    } else {
+    if (new Date(a.created_at) < new Date(b.created_at)) {
       return 1
+    } else {
+      return -1
     }
   }
 
@@ -43,20 +43,22 @@ class LoadedGames {
 
       row.appendChild(header)
 
+      const challengeInput = document.createElement('input')
+      challengeInput.type = 'text'
+      challengeInput.id = `challenge-input-${index}`
+
+      const challengeButton = document.createElement('button')
+      challengeButton.id = `challenge-button-${index}`
+      challengeButton.setAttribute('onclick', `challengeButton(${game.id}, ${index})`)
+      challengeButton.textContent = 'Challenge'
+
       const players = document.createElement('div')
       game.players.forEach((player) => {
         const playerName = document.createElement('p')
         playerName.textContent = player.username
         players.appendChild(playerName)
       })
-      const challengeInput = document.createElement('input')
-      challengeInput.type = 'text'
-      challengeInput.id = `challenge-input-${index}`
       players.appendChild(challengeInput)
-      const challengeButton = document.createElement('button')
-      challengeButton.id = `challenge-button-${index}`
-      challengeButton.setAttribute('onclick', `challengeButton(${game.id}, ${index})`)
-      challengeButton.textContent = 'Challenge'
       players.appendChild(challengeButton)
       row.appendChild(players)
 
