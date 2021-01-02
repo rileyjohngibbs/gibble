@@ -82,7 +82,7 @@ class LoadedGames {
       challengeDiv.appendChild(challengeButton)
       row.appendChild(challengeDiv)
 
-      row.style.padding = '1em 0em'
+      row.className = 'game-row'
 
       fragment.appendChild(row)
     })
