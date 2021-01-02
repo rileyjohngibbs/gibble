@@ -98,13 +98,14 @@ def create_app():
                 {
                     'id': gp.game.id,
                     'created_at': gp.game.created_at,
-                    'played': (
-                        gp.started_at is not None
-                        and gp.started_at < timelimit
-                    ),
+                    'played': gp.has_played,
                     'players': [
-                        {'id': gp_.user.id, 'username': gp_.user.username}
-                         for gp_ in gp.game.game_players
+                        {
+                            'id': gp_.user.id,
+                            'username': gp_.user.username,
+                            'played': gp_.has_played,
+                        }
+                        for gp_ in gp.game.game_players
                     ],
                 }
                 for gp in games

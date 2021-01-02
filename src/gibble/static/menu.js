@@ -23,10 +23,20 @@ class LoadedGames {
 
       const gameTitle = document.createElement('span')
       gameTitle.style.fontWeight = 'bold'
+      gameTitle.style.fontSize = 'large'
       gameTitle.textContent = `Game ${game.id}`
 
-      const gameLink = document.createElement('a')
-      if (!game.played) gameLink.href = `game.html?gameId=${game.id}`
+      let type = 'span'
+      let gameHref = null
+      let className = 'disabled'
+      if (!game.played) {
+        type = 'a'
+        gameHref = `game.html?gameId=${game.id}`
+        className = null
+      }
+      const gameLink = document.createElement(type)
+      gameLink.href = gameHref
+      gameLink.className = className
       gameLink.textContent = 'Play'
 
       const resultsLink = document.createElement('a')
@@ -35,13 +45,28 @@ class LoadedGames {
 
       const header = document.createElement('div')
       header.appendChild(gameTitle)
-      header.innerHTML += ' '
+      header.innerHTML += ' - '
       header.appendChild(gameLink)
-      header.innerHTML += ' '
+      header.innerHTML += ' - '
       header.appendChild(resultsLink)
-      header.innerHTML += ' '
 
       row.appendChild(header)
+
+      const gameDate = document.createElement('div')
+      gameDate.className = 'game-date'
+      const createdAt = new Date(game.created_at)
+      gameDate.textContent = createdAt.toISOString().substring(0, 10)
+
+      row.appendChild(gameDate)
+
+      const players = document.createElement('ul')
+      game.players.forEach((player) => {
+        const playerName = document.createElement('li')
+        playerName.className = player.played ? null : 'disabled'
+        playerName.textContent = player.username
+        players.appendChild(playerName)
+      })
+      row.appendChild(players)
 
       const challengeInput = document.createElement('input')
       challengeInput.type = 'text'
@@ -52,15 +77,10 @@ class LoadedGames {
       challengeButton.setAttribute('onclick', `challengeButton(${game.id}, ${index})`)
       challengeButton.textContent = 'Challenge'
 
-      const players = document.createElement('div')
-      game.players.forEach((player) => {
-        const playerName = document.createElement('p')
-        playerName.textContent = player.username
-        players.appendChild(playerName)
-      })
-      players.appendChild(challengeInput)
-      players.appendChild(challengeButton)
-      row.appendChild(players)
+      const challengeDiv = document.createElement('div')
+      challengeDiv.appendChild(challengeInput)
+      challengeDiv.appendChild(challengeButton)
+      row.appendChild(challengeDiv)
 
       row.style.padding = '1em 0em'
 

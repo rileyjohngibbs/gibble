@@ -32,6 +32,11 @@ class GamePlayer(db.Model):
 
     unique_game_player = db.UniqueConstraint('user_id', 'game_id')
 
+    @property
+    def has_played(self):
+        timelimit = dt.datetime.now() - dt.timedelta(minutes=3)
+        return self.started_at is not None and self.started_at < timelimit
+
 
 class Word(db.Model):
     id = db.Column(db.Integer, primary_key=True)
