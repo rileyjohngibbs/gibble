@@ -1,41 +1,36 @@
 const client = new Client()
 
-const setUser = () => {
-  const username = document.querySelector('#usernameInput').value
-  login(username)
-}
+class LoadedGames {
+  constructor() {
+    self.gamesList = []
+  }
 
-const login = (username) => {
-  client.login(username, (loginResponse) => {
-    const display = `${loginResponse.username} (${loginResponse.user_id})`
-    document.querySelector('#usernameDisplay').innerText = display
-    getGames()
-  })
-}
-
-const getGames = () => {
-  client.getGames((gamesResponse) => {
+  updateGamesListView() {
     const gamesSection = document.querySelector('#games')
     gamesSection.innerHTML = ''
-    gamesResponse.games.map((game, index) => {
+    this.gamesList.map((game, index) => {
       let row = document.createElement('div')
 
-      const header = document.createElement('div')
       const gameTitle = document.createElement('span')
       gameTitle.style.fontWeight = 'bold'
       gameTitle.textContent = `Game ${game.id}`
-      header.appendChild(gameTitle)
-      header.innerHTML += ' '
+
       const gameLink = document.createElement('a')
       if (!game.played) gameLink.href = `game.html?gameId=${game.id}`
       gameLink.textContent = 'Play'
-      header.appendChild(gameLink)
-      header.innerHTML += ' '
+
       const resultsLink = document.createElement('a')
       resultsLink.href = `results.html?gameId=${game.id}`
       resultsLink.textContent = 'Results'
+
+      const header = document.createElement('div')
+      header.appendChild(gameTitle)
+      header.innerHTML += ' '
+      header.appendChild(gameLink)
+      header.innerHTML += ' '
       header.appendChild(resultsLink)
       header.innerHTML += ' '
+
       row.appendChild(header)
 
       const players = document.createElement('div')
@@ -59,6 +54,28 @@ const getGames = () => {
 
       return row
     }).forEach((ele) => gamesSection.appendChild(ele))
+  }
+}
+
+const loadedGames = new LoadedGames()
+
+const setUser = () => {
+  const username = document.querySelector('#usernameInput').value
+  login(username)
+}
+
+const login = (username) => {
+  client.login(username, (loginResponse) => {
+    const display = `${loginResponse.username} (${loginResponse.user_id})`
+    document.querySelector('#usernameDisplay').innerText = display
+    getGames()
+  })
+}
+
+const getGames = () => {
+  client.getGames((gamesResponse) => {
+    loadedGames.gamesList = gamesResponse.games
+    loadedGames.updateGamesListView()
   })
 }
 
