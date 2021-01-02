@@ -109,11 +109,14 @@
         const scoresDiv = document.querySelector('#scores-list')
         scoresDiv.innerHTML = ''
         const scoreListings = response.users.forEach((user) => {
-          const score = response.scores.filter(score => score.user_id == user.id)[0].score
-          const scoreListing = document.createElement('div')
-          scoreListing.className = 'row'
-          scoreListing.textContent = `${user.username}: ${score}`
-          scoresDiv.appendChild(scoreListing)
+          const userScore = response.scores.filter(score => score.user_id == user.id)[0]
+          if (userScore !== undefined) {
+            const score = userScore.score
+            const scoreListing = document.createElement('div')
+            scoreListing.className = 'row'
+            scoreListing.textContent = `${user.username}: ${score}`
+            scoresDiv.appendChild(scoreListing)
+          }
         })
       })
     </script>
