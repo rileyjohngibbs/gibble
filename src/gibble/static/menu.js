@@ -5,10 +5,20 @@ class LoadedGames {
     self.gamesList = []
   }
 
-  updateGamesListView() {
+  mostRecentSort(a, b) {
+    if (a.created_at < b.created_at) {
+      return -1
+    } else {
+      return 1
+    }
+  }
+
+  updateGamesListView(sortFunc) {
+    sortFunc = sortFunc !== undefined ? sortFunc : this.mostRecentSort
     const gamesSection = document.querySelector('#games')
     gamesSection.innerHTML = ''
-    this.gamesList.map((game, index) => {
+    const fragment = document.createDocumentFragment()
+    this.gamesList.sort(sortFunc).forEach((game, index) => {
       let row = document.createElement('div')
 
       const gameTitle = document.createElement('span')
@@ -52,8 +62,9 @@ class LoadedGames {
 
       row.style.padding = '1em 0em'
 
-      return row
-    }).forEach((ele) => gamesSection.appendChild(ele))
+      fragment.appendChild(row)
+    })
+    gamesSection.appendChild(fragment)
   }
 }
 
