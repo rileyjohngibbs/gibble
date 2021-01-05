@@ -31,8 +31,8 @@ if (!Array.prototype.equals) {
 
 class Game {
 
-  constructor(endCallback) {
-    this.duration = 3 * 60 * 1000
+  constructor(endCallback, timeRemaining) {
+    this.duration = timeRemaining !== undefined ? timeRemaining : 3 * 60 * 1000
     const grid = Array(4).fill(0).map(() => Array(4).fill('A'))
     this.board = new Board(grid)
     this.words = []

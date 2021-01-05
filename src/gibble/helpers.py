@@ -1,4 +1,9 @@
 from collections import Counter
+import datetime as dt
+
+
+def game_duration(buffer_=False):
+    return dt.timedelta(minutes=3, seconds=10 * buffer_)
 
 
 def make_grid_array(flat_grid):

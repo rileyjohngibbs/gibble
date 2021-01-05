@@ -2,6 +2,8 @@ import datetime as dt
 
 from flask_sqlalchemy import SQLAlchemy
 
+from gibble.helpers import game_duration
+
 db = SQLAlchemy()
 
 
@@ -34,7 +36,7 @@ class GamePlayer(db.Model):
 
     @property
     def has_played(self):
-        timelimit = dt.datetime.now() - dt.timedelta(minutes=3)
+        timelimit = dt.datetime.now() - game_duration()
         return self.started_at is not None and self.started_at < timelimit
 
 

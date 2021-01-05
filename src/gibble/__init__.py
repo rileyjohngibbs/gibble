@@ -4,7 +4,12 @@ from random import randint, shuffle
 
 from flask import Flask, g, jsonify, redirect, request, send_from_directory
 
-from gibble.helpers import make_grid_array, score_game, score_word
+from gibble.helpers import (
+    game_duration,
+    make_grid_array,
+    score_game,
+    score_word,
+)
 
 def create_app():
     app = Flask(__name__, static_url_path='')
@@ -92,7 +97,7 @@ def create_app():
             .filter(GamePlayer.user_id == g.user.id)
             .all()
         )
-        timelimit = dt.datetime.now() - dt.timedelta(minutes=3)
+        timelimit = dt.datetime.now() - game_duration()
         return {
             'games': [
                 {
@@ -123,10 +128,20 @@ def create_app():
         )
         flat_grid = game_player.game.grid
         grid = make_grid_array(flat_grid)
+        now = dt.datetime.now()
         if game_player.started_at is None:
-            game_player.started_at = dt.datetime.now()
+            game_player.started_at = now
             db.session.commit()
-        return {'grid': grid}
+        time_elapsed = now - game_player.started_at
+        seconds_remaining = int(
+            (game_duration() - time_elapsed).total_seconds()
+        )
+        words = [word.word for word in game_player.words]
+        return {
+            'grid': grid,
+            'seconds_remaining': max(seconds_remaining, 0),
+            'words_played': words,
+        }
 
     @app.route('/games/<int:game_id>', methods=['GET'])
     def get_single_game(game_id):
@@ -236,7 +251,7 @@ def create_app():
 
     @app.route('/games/<int:game_id>/words', methods=['POST'])
     def submit_words(game_id):
-        TIMELIMIT = dt.timedelta(minutes=3, seconds=10)
+        TIMELIMIT = game_duration(buffer_=True)
         words = request.json.get('words')
         game_player = (
             db.session.query(GamePlayer)
@@ -270,7 +285,7 @@ def create_app():
             .filter_by(game_id=game_id, user_id=g.user.id)
             .first_or_404()
         )
-        TIMELIMIT = dt.timedelta(minutes=3, seconds=10)
+        TIMELIMIT = game_duration(buffer_=True)
         complete = (
             game_player.started_at is not None
             and dt.datetime.now() - game_player.started_at > TIMELIMIT

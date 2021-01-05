@@ -37,6 +37,9 @@
       #game-id {
         font-size: small;
       }
+      #timer {
+        margin: 1em 0em;
+      }
     </style>
   </head>
   <body>
@@ -53,6 +56,9 @@
       <div id="entry">
         <input type="text" id="wordentry" onkeypress="entryKey()">
         <button onclick="submit()">Submit</button>
+      </div>
+      <div id="timer">
+        Time remaining: <span id="timer-value"></span>
       </div>
       <div id="wordlist">
       </div>
@@ -72,12 +78,23 @@
             client.submitWords(gameId, game.words, () => {
               setTimeout(() => { window.location.href = `results.html?gameId=${gameId}` }, 3000)
             })
-          });
+          }, apiGame.seconds_remaining * 1000);
           game.board.grid = apiGame.grid;
           document.querySelector('#board').innerHTML = game.render();
           document.querySelector('#game-id').innerHTML = `Game ID: ${gameId}`;
+          startTimer(apiGame.seconds_remaining)
+          apiGame.words_played.forEach(word => addWordToList(word))
           wordEntry.focus();
         });
+      }
+
+      const startTimer = (seconds) => {
+        const timerDisplay = document.querySelector('#timer-value')
+        const start = new Date()
+        const elapsedTime = () => Math.round((new Date() - start) / 1000)
+        const updateTimer = () => timerDisplay.textContent = Math.max(seconds - elapsedTime(), 0)
+        updateTimer()
+        const timerval = setInterval(updateTimer, 500)
       }
 
       let urlGameId = new URL(window.location.href).searchParams.get('gameId')
@@ -87,15 +104,12 @@
         client.newGame((resp) => window.location.href = `game.html?gameId=${resp.id}`)
       }
 
-      function submit() {
+      const submit = () => {
         const word = wordEntry.value.toUpperCase();
         const valid = game.submitWord(word);
         if (valid) {
           client.submitWords(urlGameId, [word], () => {})
-          const newWordDiv = document.createElement('div');
-          newWordDiv.className = 'found-word';
-          newWordDiv.innerText = word;
-          wordList.appendChild(newWordDiv);
+          addWordToList(word)
         } else {
           wordEntry.style.backgroundColor = 'pink'
           setTimeout(() => wordEntry.style.backgroundColor = null, 250)
@@ -103,7 +117,14 @@
         wordEntry.value = '';
       }
 
-      function entryKey() {
+      const addWordToList = (word) => {
+        const newWordDiv = document.createElement('div');
+        newWordDiv.className = 'found-word';
+        newWordDiv.innerText = word;
+        wordList.appendChild(newWordDiv);
+      }
+
+      const entryKey = () => {
         if (event.key === 'Enter') {
           submit()
         }
