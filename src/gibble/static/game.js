@@ -52,18 +52,20 @@ class Game {
     return valid
   }
 
-  render() {
-    return '<div class="row">'
-      + this.board.grid.map(
-        (row) => row.map(
-          (letter) => (
-            '<div class="die">'
-            + (letter === 'Q' ? 'Qu' : letter)
-            + '</div>'
-          )
-        ).join('')
-      ).join('</div><div class="row">')
-      + '</div>'
+  renderBoard() {
+    const fragment = document.createDocumentFragment()
+    this.board.grid.forEach((row) => {
+      const rowDiv = document.createElement('div')
+      rowDiv.className = 'row'
+      row.forEach((die) => {
+        const dieDiv = document.createElement('div')
+        dieDiv.className = 'die'
+        dieDiv.textContent = die == 'Q' ? 'Qu' : die
+        rowDiv.appendChild(dieDiv)
+      })
+      fragment.appendChild(rowDiv)
+    })
+    return fragment
   }
 }
 

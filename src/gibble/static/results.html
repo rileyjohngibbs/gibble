@@ -5,42 +5,7 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-      a:link {
-        text-decoration: none;
-      }
-      a:visited {
-        text-decoration: none;
-      }
-      a:hover {
-        text-decoration: underline;
-      }
-      a:active {
-        text-decoration: underline;
-      }
-      .section {
-        margin: 2em 1em;
-      }
-      #words-list td {
-        padding: 0.5em;
-        max-width: 10em;
-      }
-      #words-list th {
-        padding: 0.5em;
-        text-align: left;
-      }
-      #scores-list div {
-        padding: 0.5em;
-      }
-      .die {
-        height: 2em;
-        width: 2em;
-        text-align: center;
-        float: left;
-      }
-      .row {
-        height: 2em;
-    </style>
+    <link rel="stylesheet" href="base.css?v=20210104">
   </head>
   <body>
     <div class="section">
@@ -54,14 +19,14 @@
     </div>
     <div class="section">
       <h2>Words Played</h2>
-      <div id="words-list"></div>
+      <div id="words-table"></div>
     </div>
     <script src="./api.js"></script>
-    <script src="./game.js"></script>
+    <script src="./game.js?v=20210104-1"></script>
     <script>
       const client = new Client()
       const game = new Game(() => {})
-      const wordsList = document.querySelector('#words-list')
+      const wordsList = document.querySelector('#words-table')
       let urlGameId = new URL(window.location.href).searchParams.get('gameId')
 
       document.querySelector('#game-id').innerText = urlGameId
@@ -73,7 +38,6 @@
           + '<th>Word</th>'
           + '<th>Points</th>'
           + '<th>Played By</th>'
-          + '<th>Vetoed By</th>'
           + '</tr>'
         let body = document.createElement('tbody')
         const sortedWords = Object.keys(wordCounts).sort((a, b) => b.length - a.length)
@@ -105,7 +69,7 @@
         })
         updateWords(wordCounts)
         game.board.grid = response.grid
-        document.querySelector('#board').innerHTML = game.render()
+        document.querySelector('#board').appendChild(game.renderBoard())
         const scoresDiv = document.querySelector('#scores-list')
         scoresDiv.innerHTML = ''
         const scoreListings = response.users.forEach((user) => {

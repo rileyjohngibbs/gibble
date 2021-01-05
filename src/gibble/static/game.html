@@ -5,45 +5,10 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-      a:link {
-        text-decoration: none;
-      }
-      a:visited {
-        text-decoration: none;
-      }
-      a:hover {
-        text-decoration: underline;
-      }
-      a:active {
-        text-decoration: underline;
-      }
-      .section {
-        margin: 2em 1em;
-      }
-      .found-word {
-        height: 2em;
-        line-height: 2em;
-      }
-      .die {
-        height: 2em;
-        width: 2em;
-        text-align: center;
-        float: left;
-      }
-      .row {
-        height: 2em;
-      }
-      #game-id {
-        font-size: small;
-      }
-      #timer {
-        margin: 1em 0em;
-      }
-    </style>
+    <link rel="stylesheet" href="base.css?v=20210104">
   </head>
   <body>
-    <script src="./game.js?v=20210104"></script>
+    <script src="./game.js?v=20210104-1"></script>
     <script src="./api.js"></script>
     <div id="title" class="section">
       <h1 class="app-title"><a href="/menu.html">Gibble</a></h1>
@@ -51,7 +16,7 @@
     <div id="game" class="section">
       <div id="board">
       </div>
-      <div id="game-id">
+      <div id="game-id-div">
       </div>
       <div id="entry">
         <input type="text" id="wordentry" onkeypress="entryKey()">
@@ -80,8 +45,8 @@
             })
           }, apiGame.seconds_remaining * 1000);
           game.board.grid = apiGame.grid;
-          document.querySelector('#board').innerHTML = game.render();
-          document.querySelector('#game-id').innerHTML = `Game ID: ${gameId}`;
+          document.querySelector('#board').appendChild(game.renderBoard());
+          document.querySelector('#game-id-div').innerHTML = `Game ${gameId}`;
           startTimer(apiGame.seconds_remaining)
           apiGame.words_played.forEach(word => addWordToList(word))
           wordEntry.focus();
