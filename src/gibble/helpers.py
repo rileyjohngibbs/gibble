@@ -19,7 +19,7 @@ def score_word(word):
         4: 1,
         5: 2,
         6: 3,
-        7: 4,
+        7: 5,
         8: 11,
     }
     length = len(word)
