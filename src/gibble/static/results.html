@@ -34,11 +34,14 @@
       const updateWords = (wordCounts) => {
         let table = document.createElement('table')
         let header = document.createElement('thead')
-        header.innerHTML = '<tr>'
-          + '<th>Word</th>'
-          + '<th>Points</th>'
-          + '<th>Played By</th>'
-          + '</tr>'
+        let headerRow = document.createElement('tr')
+        let headerTitles = ['Word', '', 'Points', 'Played By', 'Vetoed By']
+        headerTitles.forEach(headTitle => {
+          const cell = document.createElement('th')
+          cell.textContent = headTitle
+          headerRow.appendChild(cell)
+        })
+        header.appendChild(headerRow)
         let body = document.createElement('tbody')
         const sortedWords = Object.keys(wordCounts).sort((a, b) => b.length - a.length)
         const tableBody = sortedWords.forEach((word) => {
@@ -46,12 +49,24 @@
           const wordCell = document.createElement('td')
           wordCell.textContent = `${word}`
           row.appendChild(wordCell)
+          const vetoButtonCell = document.createElement('td')
+          const vetoButton = document.createElement('button')
+          vetoButton.className = 'veto-button'
+          vetoButton.textContent = 'Veto'
+          vetoButton.onclick = () => client.vetoWord(urlGameId, word, (resp) => loadGame())
+          vetoButtonCell.appendChild(vetoButton)
+          row.appendChild(vetoButtonCell)
           const pointsCell = document.createElement('td')
           pointsCell.textContent = `${wordCounts[word].score}`
           row.appendChild(pointsCell)
           const playedCell = document.createElement('td')
-          playedCell.textContent = `${wordCounts[word].users.map(u => u.username).join(', ')}`
+          playedCell.textContent = `${wordCounts[word].users.join(', ')}`
           row.appendChild(playedCell)
+          const vetoCell = document.createElement('td')
+          const vetoNames = document.createElement('span')
+          vetoNames.textContent = `${wordCounts[word].vetoes.join(', ')}`
+          vetoCell.appendChild(vetoNames)
+          row.appendChild(vetoCell)
           body.appendChild(row)
         })
         table.appendChild(header)
@@ -60,29 +75,41 @@
         wordsList.appendChild(table)
       }
 
-      client.getSingleGame(urlGameId, (response) => {
-        let wordCounts = {}
-        response.words.forEach((word) => {
-          if (!wordCounts[word.word]) wordCounts[word.word] = {'users': [], 'score': word.score}
-          const user = response.users.filter(user => user.id === word.user_id)[0]
-          wordCounts[word.word].users.push(user)
+      const loadGame = () => {
+        client.getSingleGame(urlGameId, (response) => {
+          let usernamesMap = {}
+          response.users.forEach(user => usernamesMap[user.id] = user.username)
+          let wordCounts = {}
+          response.words.forEach((word) => {
+            if (!wordCounts[word.word]) wordCounts[word.word] = {'users': [], 'score': word.score, 'vetoes': []}
+            const user = usernamesMap[word.user_id]
+            wordCounts[word.word].users.push(user)
+          })
+          response.vetoes.forEach((veto) => {
+            const user = usernamesMap[veto.user_id]
+            wordCounts[veto.word].vetoes.push(user)
+          })
+          updateWords(wordCounts)
+          game.board.grid = response.grid
+          const boardDiv = document.querySelector('#board')
+          boardDiv.innerHTML = ''
+          boardDiv.appendChild(game.renderBoard())
+          const scoresDiv = document.querySelector('#scores-list')
+          scoresDiv.innerHTML = ''
+          const scoreListings = response.users.forEach((user) => {
+            const userScore = response.scores.filter(score => score.user_id == user.id)[0]
+            if (userScore !== undefined) {
+              const score = userScore.score
+              const scoreListing = document.createElement('div')
+              scoreListing.className = 'row'
+              scoreListing.textContent = `${user.username}: ${score}`
+              scoresDiv.appendChild(scoreListing)
+            }
+          })
         })
-        updateWords(wordCounts)
-        game.board.grid = response.grid
-        document.querySelector('#board').appendChild(game.renderBoard())
-        const scoresDiv = document.querySelector('#scores-list')
-        scoresDiv.innerHTML = ''
-        const scoreListings = response.users.forEach((user) => {
-          const userScore = response.scores.filter(score => score.user_id == user.id)[0]
-          if (userScore !== undefined) {
-            const score = userScore.score
-            const scoreListing = document.createElement('div')
-            scoreListing.className = 'row'
-            scoreListing.textContent = `${user.username}: ${score}`
-            scoresDiv.appendChild(scoreListing)
-          }
-        })
-      })
+    }
+
+    loadGame()
     </script>
   </body>
 </html>

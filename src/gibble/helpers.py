@@ -27,8 +27,9 @@ def score_word(word):
     return score
 
 
-def score_game(words):
+def score_game(words, vetoes):
     '''words: {word, user_id, score}'''
+    veto_counts = Counter(veto['word'] for veto in vetoes)
     player_scores = {word['user_id']: 0 for word in words}
     word_counts = Counter(word['word'] for word in words)
     unique_words = set(
@@ -36,8 +37,18 @@ def score_game(words):
         for word, count in word_counts.items()
         if count == 1
     )
+    veto_threshold = int(len(player_scores.keys()) / 2 + 0.5)
     for word in words:
-        if word['word'] in unique_words:
+        veto_count = veto_counts.get(word['word'], 0)
+        vetoed = (
+            veto_count >= veto_threshold
+            or any(
+                v['user_id'] == word['user_id']
+                and v['word'] == word['word']
+                for v in vetoes
+            )
+        )
+        if word['word'] in unique_words and not vetoed:
             player_scores[word['user_id']] += word['score']
     player_scores_list = [
         {'user_id': user_id, 'score': score}

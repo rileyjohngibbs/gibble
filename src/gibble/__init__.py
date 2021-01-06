@@ -177,12 +177,12 @@ def create_app():
             for gp in game.game_players
             for word in gp.words
         ] or []
-        player_scores = score_game(words)
         vetoes = has_played and [
             {'word': rejection.word, 'user_id': gp.user.id}
             for gp in game.game_players
             for rejection in gp.word_rejections
         ] or []
+        player_scores = score_game(words, vetoes)
         grid = (
             has_played
             and make_grid_array(game.grid)
@@ -324,9 +324,16 @@ def create_app():
             .first_or_404()
         )
         word = request.json.get('word')
-        veto = WordRejection(word=word, game_player_id=game_player.id)
-        db.session.add(veto)
-        db.session.commit()
+        existing_veto = db.session.query(WordRejection).get(
+            {'word': word, 'game_player_id': game_player.id},
+        )
+        if existing_veto is None:
+            veto = WordRejection(word=word, game_player_id=game_player.id)
+            db.session.add(veto)
+            db.session.commit()
+        else:
+            db.session.delete(existing_veto)
+            db.session.commit()
         vetoes = (
             db.session.query(WordRejection.word, GamePlayer.user_id)
             .join(GamePlayer, GamePlayer.id == WordRejection.game_player_id)

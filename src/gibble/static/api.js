@@ -121,4 +121,19 @@ class Client {
     request.open(method, url)
     request.send()
   }
+
+  vetoWord(gameId, word, callback) {
+    const method = 'POST'
+    const url = `/games/${gameId}/vetoes`
+    const data = JSON.stringify({word})
+    let request = new XMLHttpRequest()
+    request.onreadystatechange = (x) => {
+      if (request.readyState === 4) {
+        callback(JSON.parse(request.response))
+      }
+    }
+    request.open(method, url)
+    request.setRequestHeader('Content-type', 'application/json')
+    request.send(data)
+  }
 }

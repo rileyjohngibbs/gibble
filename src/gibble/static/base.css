@@ -37,6 +37,9 @@ a:active {
 .section {
   margin: 2em 1em;
 }
+.veto-button {
+  margin: 0em 0.5em;
+}
 #game-id-div {
   font-size: small;
 }
