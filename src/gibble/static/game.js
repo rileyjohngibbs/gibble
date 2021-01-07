@@ -52,15 +52,29 @@ class Game {
     return valid
   }
 
-  renderBoard() {
+  renderBoard(onClickFunc) {
     const fragment = document.createDocumentFragment()
     this.board.grid.forEach((row) => {
       const rowDiv = document.createElement('div')
-      rowDiv.className = 'row'
+      rowDiv.className = 'die-row'
       row.forEach((die) => {
         const dieDiv = document.createElement('div')
         dieDiv.className = 'die'
         dieDiv.textContent = die == 'Q' ? 'Qu' : die
+        if (onClickFunc) {
+          dieDiv.className += ' die-clickable'
+          dieDiv.onclick = () => {
+            if (this.active) {
+              dieDiv.style.transition = null
+              dieDiv.style.background = '#d0d0d0'
+              setTimeout(() => {
+                dieDiv.style.transition = 'background .5s'
+                dieDiv.style.background = null
+              }, 100)
+              onClickFunc(die)
+            }
+          }
+        }
         rowDiv.appendChild(dieDiv)
       })
       fragment.appendChild(rowDiv)

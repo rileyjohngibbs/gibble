@@ -5,10 +5,10 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="base.css?v=20210104">
+    <link rel="stylesheet" href="base.css?v=20210106">
   </head>
   <body>
-    <script src="./game.js?v=20210104-1"></script>
+    <script src="./game.js?v=20210106"></script>
     <script src="./api.js"></script>
     <div id="title" class="section">
       <h1 class="app-title"><a href="/menu.html">Gibble</a></h1>
@@ -45,7 +45,9 @@
             })
           }, apiGame.seconds_remaining * 1000);
           game.board.grid = apiGame.grid;
-          document.querySelector('#board').appendChild(game.renderBoard());
+          document.querySelector('#board').appendChild(game.renderBoard(
+            (die) => wordEntry.value += die
+          ));
           document.querySelector('#game-id-div').innerHTML = `Game ${gameId}`;
           startTimer(apiGame.seconds_remaining)
           apiGame.words_played.forEach(word => addWordToList(word))
