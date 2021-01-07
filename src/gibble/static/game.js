@@ -92,6 +92,7 @@ class Board {
   }
 
   validate(word) {
+    if (!word) return false
     const qword = word.toUpperCase().replaceAll('QU', 'Q')
     const paths = qword.split('').reduce(
       (ps, c) => this.extendPaths(

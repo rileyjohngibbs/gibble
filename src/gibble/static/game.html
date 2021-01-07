@@ -72,7 +72,7 @@
       }
 
       const submit = () => {
-        const word = wordEntry.value.toUpperCase();
+        const word = wordEntry.value.toUpperCase().replaceAll(' ', '');
         const valid = game.submitWord(word);
         if (valid) {
           client.submitWords(urlGameId, [word], () => {})
