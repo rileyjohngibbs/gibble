@@ -1,1 +1,1 @@
-web: gunicorn --pythonpath "src" "gibble:create_app()"
+web: gunicorn "gibble:create_app()"
