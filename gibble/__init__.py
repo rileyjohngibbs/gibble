@@ -208,7 +208,7 @@ def create_app():
             .filter_by(user_id=g.user.id, game_id=game_id)
             .first_or_404()
         )
-        opponent_username = request.json.get('username')
+        opponent_username = request.json.get('username').strip()
         if opponent_username is None:
             return {'error': 'Missing username for opponent'}, 400
         opponent = (
