@@ -1,14 +1,15 @@
 import datetime as dt
 from os import getenv
-from random import randint, shuffle
 
 from flask import Flask, g, jsonify, redirect, request, send_from_directory
 
 from gibble.helpers import (
+    SIZE,
     game_duration,
     make_grid_array,
     score_game,
     score_word,
+    generate_grid,
 )
 
 def create_app():
@@ -53,30 +54,15 @@ def create_app():
 
     @app.route('/games', methods=['POST'])
     def create_game():
+        puzzle_word = (request.json.get('puzzle_word') or '').strip()
+        puzzle_word = 'challenge'
+        if len(puzzle_word) > SIZE**2:
+            return {'error': 'puzzle_word is too long'}, 400
+        grid = generate_grid(puzzle_word)
         dice_slots = list(range(16))
-        shuffle(dice_slots)
-        faces = [randint(0, 5) for _ in range(16)]
-        dice = [
-            'AACIOT',
-            'ABILTY',
-            'ABJMOQ',
-            'ACDEMP',
-            'ACELRS',
-            'ADENVZ',
-            'AHMORS',
-            'BIFORX',
-            'DENOSW',
-            'DKNOTU',
-            'EEFHIY',
-            'EGKLUY',
-            'EGINTV',
-            'EHINPS',
-            'ELPSTU',
-            'GILRUW',
-        ]
-        grid = ''.join(dice[d][f] for d, f in zip(dice_slots, faces))
         game = Game(grid=grid)
-        game_player = GamePlayer(user_id=g.user.id)
+        is_puzzle = bool(puzzle_word)
+        game_player = GamePlayer(user_id=g.user.id, puzzle_maker=is_puzzle)
         game.game_players.append(game_player)
         db.session.add(game)
         db.session.commit()
