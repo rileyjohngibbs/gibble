@@ -60,8 +60,9 @@ def create_app():
         grid = generate_grid(puzzle_word)
         dice_slots = list(range(16))
         game = Game(grid=grid)
-        is_puzzle = bool(puzzle_word)
-        game_player = GamePlayer(user_id=g.user.id, puzzle_maker=is_puzzle)
+        game_player = GamePlayer(user_id=g.user.id)
+        if puzzle_word:
+            game_player.started_at = dt.datetime.now() - game_duration(buffer_=True)
         game.game_players.append(game_player)
         db.session.add(game)
         db.session.commit()

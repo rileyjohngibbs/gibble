@@ -31,7 +31,6 @@ class GamePlayer(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'), index=True)
     started_at = db.Column(db.DateTime)
-    puzzle_maker = db.Column(db.Boolean, default=False)
 
     unique_game_player = db.UniqueConstraint('user_id', 'game_id')
 
