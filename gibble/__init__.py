@@ -62,7 +62,8 @@ def create_app():
         game = Game(grid=grid)
         game_player = GamePlayer(user_id=g.user.id)
         if puzzle_word:
-            game_player.started_at = dt.datetime.now() - game_duration(buffer_=True)
+            delta = game_duration(buffer_=True)
+            game_player.started_at = dt.datetime.now() - delta
         game.game_players.append(game_player)
         db.session.add(game)
         db.session.commit()
