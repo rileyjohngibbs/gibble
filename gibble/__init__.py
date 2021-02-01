@@ -55,7 +55,6 @@ def create_app():
     @app.route('/games', methods=['POST'])
     def create_game():
         puzzle_word = (request.json.get('puzzle_word') or '').strip()
-        puzzle_word = 'challenge'
         if len(puzzle_word) > SIZE**2:
             return {'error': 'puzzle_word is too long'}, 400
         grid = generate_grid(puzzle_word)
