@@ -187,7 +187,11 @@ def create_app():
             and game.puzzle_word
             or '*' * len(game.puzzle_word or '')
         )
-        puzzle_hint = game.puzzle_hint
+        puzzle_hint = (
+            has_played
+            and game.puzzle_hint
+            or None
+        )
         return {
             'id': game.id,
             'grid': grid,

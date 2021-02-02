@@ -102,7 +102,12 @@
             puzzleWord.innerText = `Puzzle word: ${response.puzzle_word}`
             puzzleDiv.appendChild(puzzleWord)
             const puzzleHint = document.createElement('p')
-            puzzleHint.innerText = `Hint: ${response.puzzle_hint ? '"' + response.puzzle_hint + '"' : '(no hint given)'}`
+            const hintText = response.played
+              ? response.puzzle_hint
+                ? `"${response.puzzle_hint}"`
+                : '(no hint given)'
+              : response.puzzle_word
+            puzzleHint.innerText = `Hint: ${hintText}`
             puzzleDiv.appendChild(puzzleHint)
           }
           const scoresDiv = document.querySelector('#scores-list')
