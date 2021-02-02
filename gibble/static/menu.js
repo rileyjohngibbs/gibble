@@ -113,7 +113,10 @@ const getGames = () => {
 }
 
 const newGame = () => {
-  client.newGame((resp) => {
+  const isPuzzle = document.querySelector('#isPuzzle').checked
+  const puzzleWord = isPuzzle ? document.querySelector('#puzzleWord').value : null
+  const puzzleHint = isPuzzle ? document.querySelector('#puzzleHint').value : null
+  client.newGame(puzzleWord, puzzleHint, (resp) => {
     getGames()
   })
 }

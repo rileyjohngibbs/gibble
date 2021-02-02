@@ -55,6 +55,7 @@ def create_app():
     @app.route('/games', methods=['POST'])
     def create_game():
         puzzle_word = (request.json.get('puzzle_word') or '').strip()
+        puzzle_hint = (request.json.get('puzzle_hint') or '').strip()
         if len(puzzle_word) > SIZE**2:
             return {'error': 'puzzle_word is too long'}, 400
         grid = generate_grid(puzzle_word)
@@ -62,6 +63,8 @@ def create_app():
         game = Game(grid=grid)
         game_player = GamePlayer(user_id=g.user.id)
         if puzzle_word:
+            game.puzzle_word = puzzle_word
+            game.puzzle_hint = puzzle_hint
             delta = game_duration(buffer_=True)
             game_player.started_at = dt.datetime.now() - delta
         game.game_players.append(game_player)
@@ -124,10 +127,14 @@ def create_app():
             (game_duration() - time_elapsed).total_seconds()
         )
         words = [word.word for word in game_player.words]
+        puzzle_word = '*' * len(game_player.game.puzzle_word or '')
+        puzzle_hint = game_player.game.puzzle_hint
         return {
             'grid': grid,
             'seconds_remaining': max(seconds_remaining, 0),
             'words_played': words,
+            'puzzle_word': puzzle_word,
+            'puzzle_hint': puzzle_hint,
         }
 
     @app.route('/games/<int:game_id>', methods=['GET'])
@@ -175,9 +182,17 @@ def create_app():
             and make_grid_array(game.grid)
             or make_grid_array('?' * 16)
         )
+        puzzle_word = (
+            has_played
+            and game.puzzle_word
+            or '*' * len(game.puzzle_word or '')
+        )
+        puzzle_hint = game.puzzle_hint
         return {
             'id': game.id,
             'grid': grid,
+            'puzzle_word': puzzle_word,
+            'puzzle_hint': puzzle_hint,
             'played': has_played,
             'created_at': game.created_at,
             'users': users,
