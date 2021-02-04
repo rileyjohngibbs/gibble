@@ -106,7 +106,11 @@ def extend_path(path: List[int]) -> List[List[int]]:
 
 
 def get_possible_paths(word_length) -> List[List[int]]:
-    paths = [[x] for x in range(SIZE**2)]
+    paths = [  # TODO: Make this uniform for SIZE % 2 == 1
+        [y * SIZE + x]
+        for y in range(int(SIZE / 2 + 0.5))
+        for x in range(int(SIZE / 2 + 0.5))
+    ]
     for _ in range(word_length - 1):
         paths = [
             extension
@@ -124,7 +128,32 @@ def generate_grid(puzzle_word: Optional[str]) -> str:
     if puzzle_word:
         possible_paths = get_possible_paths(len(puzzle_word.strip()))
         puzzle_path = possible_paths[randint(0, len(possible_paths) - 1)]
+        for transform in (hflip, vflip, rotate):
+            if randint(0, 1):
+                puzzle_path = map(transform, puzzle_path)
         for index, character in zip(puzzle_path, puzzle_word.upper()):
             slots[index] = character
     grid = ''.join(slots)
     return grid
+
+
+def hflip(index):
+    x = index % SIZE
+    x_flip = SIZE - 1 - x
+    index_flip = index - x + x_flip
+    return index_flip
+
+
+def vflip(index):
+    y = index // SIZE
+    y_flip = SIZE - 1 - y
+    index_flip = SIZE * y_flip + (index % SIZE)
+    return index_flip
+
+
+def rotate(index):
+    y = index // SIZE
+    x = index % SIZE
+    new_y = SIZE - 1 - x
+    new_x = y
+    return new_y * SIZE + new_x

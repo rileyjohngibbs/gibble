@@ -1,6 +1,12 @@
 import pytest
 
-from gibble.helpers import get_neighbor_indices, extend_path
+from gibble.helpers import (
+    extend_path,
+    get_neighbor_indices,
+    hflip,
+    rotate,
+    vflip,
+)
 
 index_neighbors = [
     (0, {1, 4, 5}),
@@ -48,3 +54,18 @@ path_extensions = [
 def test_extend_path(path, expected_extensions):
     extensions = extend_path(path)
     assert sorted(extensions) == sorted(expected_extensions)
+
+
+@pytest.mark.parametrize('index,expected', [(0, 3), (5, 6), (10, 9), (15, 12)])
+def test_hflip(index, expected):
+    assert hflip(index) == expected
+
+
+@pytest.mark.parametrize('index,expected', [(0, 12), (5, 9), (10, 6), (15, 3)])
+def test_vflip(index, expected):
+    assert vflip(index) == expected
+
+
+@pytest.mark.parametrize('index,expected', [(1, 8), (4, 13), (11, 2), (3, 0)])
+def test_rotate(index, expected):
+    assert rotate(index) == expected
