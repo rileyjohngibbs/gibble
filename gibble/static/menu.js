@@ -113,11 +113,17 @@ const getGames = () => {
 }
 
 const newGame = () => {
+  const button = event.currentTarget
+  button.disabled = true
+  const buttonText = button.innerText
+  button.innerText = '...'
   const isPuzzle = document.querySelector('#isPuzzle').checked
   const puzzleWord = isPuzzle ? document.querySelector('#puzzleWord').value : null
   const puzzleHint = isPuzzle ? document.querySelector('#puzzleHint').value : null
   client.newGame(puzzleWord, puzzleHint, (resp) => {
     getGames()
+    button.innerText = buttonText
+    button.disabled = false
   })
 }
 
