@@ -29,7 +29,10 @@ def create_app():
         if user_id is not None:
             user = db.session.query(User).filter_by(id=user_id).first()
             if user is None:
-                return {'error': 'Unknown user_id'}, 401
+                response = jsonify({'error': 'Unknown user; please reload'})
+                response.set_cookie('user_id', '', expires=0)
+                response.set_cookie('username', '', expires=0)
+                return response, 401
         else:
             user = None
         g.user = user
@@ -40,7 +43,9 @@ def create_app():
 
     @app.route('/login', methods=['POST'])
     def login():
-        username = request.json.get('username')
+        username = request.json.get('username').strip()
+        if not username:
+            return {'error': 'No username provided'}, 401
         user = db.session.query(User).filter_by(username=username).first()
         if user is None:
             user = User(username=username)
