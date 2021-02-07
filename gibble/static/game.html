@@ -22,6 +22,8 @@
         <input type="text" id="wordentry" onkeypress="entryKey()">
         <button onclick="submit()">Submit</button>
       </div>
+      <div id="puzzleInfo">
+      </div>
       <div id="timer">
         Time remaining: <span id="timer-value"></span>
       </div>
@@ -52,6 +54,15 @@
           startTimer(apiGame.seconds_remaining)
           apiGame.words_played.forEach(word => addWordToList(word))
           wordEntry.focus();
+          if (apiGame.puzzle_word) {
+            const puzzleInfoDiv = document.querySelector('#puzzleInfo')
+            const wordInfo = document.createElement('p')
+            wordInfo.innerText = `Puzzle word: ${apiGame.puzzle_word.length} letters`
+            puzzleInfoDiv.appendChild(wordInfo)
+            const hint = document.createElement('p')
+            hint.innerText = `Hint: ${apiGame.puzzle_hint ? '"' + apiGame.puzzle_hint + '"' : '(no hint given)'}`
+            puzzleInfoDiv.appendChild(hint)
+          }
         });
       }
 

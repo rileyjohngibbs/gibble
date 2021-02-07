@@ -1,7 +1,11 @@
 class Client {
-  newGame(callback) {
+  newGame(puzzleWord, puzzleHint, callback) {
     const method = 'POST'
     const url = '/games'
+    const data = JSON.stringify({
+      puzzle_word: puzzleWord,
+      puzzle_hint: puzzleHint
+    })
     let request = new XMLHttpRequest()
     request.onreadystatechange = (x) => {
       if (request.readyState === 4) {
@@ -9,7 +13,8 @@ class Client {
       }
     }
     request.open(method, url)
-    request.send()
+    request.setRequestHeader('Content-type', 'application/json')
+    request.send(data)
   }
 
   getGames(callback) {

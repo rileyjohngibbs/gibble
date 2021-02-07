@@ -1,5 +1,29 @@
 from collections import Counter
 import datetime as dt
+from random import randint, shuffle
+from typing import List, Optional
+
+
+SIZE = 4
+
+DICE = [
+    'AACIOT',
+    'ABILTY',
+    'ABJMOQ',
+    'ACDEMP',
+    'ACELRS',
+    'ADENVZ',
+    'AHMORS',
+    'BIFORX',
+    'DENOSW',
+    'DKNOTU',
+    'EEFHIY',
+    'EGKLUY',
+    'EGINTV',
+    'EHINPS',
+    'ELPSTU',
+    'GILRUW',
+]
 
 
 def game_duration(buffer_=False):
@@ -7,9 +31,9 @@ def game_duration(buffer_=False):
 
 
 def make_grid_array(flat_grid):
-    grid = [[None] * 4 for _ in range(4)]
+    grid = [[None] * SIZE for _ in range(SIZE)]
     for i, letter in enumerate(flat_grid):
-        grid[i // 4][i % 4] = letter
+        grid[i // SIZE][i % SIZE] = letter
     return grid
 
 
@@ -55,3 +79,81 @@ def score_game(words, vetoes):
         for user_id, score in player_scores.items()
     ]
     return player_scores_list
+
+
+def get_neighbor_indices(index: int) -> List[int]:
+    candidates = (
+        index + SIZE*j + i
+        for j in (-1, 0, 1)
+        for i in (-1, 0, 1)
+        if (i, j) != (0, 0)
+    )
+    x = index % SIZE
+    return [
+        c for c in candidates
+        if 0 <= c < SIZE**2
+        and abs((c % SIZE) - x) <= 1
+    ]
+
+
+def extend_path(path: List[int]) -> List[List[int]]:
+    tail = path[-1]
+    return [
+        path + [candidate]
+        for candidate in get_neighbor_indices(tail)
+        if candidate not in path
+    ]
+
+
+def get_possible_paths(word_length) -> List[List[int]]:
+    paths = [  # TODO: Make this uniform for SIZE % 2 == 1
+        [y * SIZE + x]
+        for y in range(int(SIZE / 2 + 0.5))
+        for x in range(int(SIZE / 2 + 0.5))
+    ]
+    for _ in range(word_length - 1):
+        paths = [
+            extension
+            for path in paths
+            for extension in extend_path(path)
+        ]
+    return paths
+
+
+def generate_grid(puzzle_word: Optional[str]) -> str:
+    dice_slots = list(range(SIZE**2))
+    shuffle(dice_slots)
+    faces = [die[randint(0, 5)] for die in DICE]
+    slots = [faces[slot] for slot in dice_slots]
+    if puzzle_word:
+        possible_paths = get_possible_paths(len(puzzle_word.strip()))
+        puzzle_path = possible_paths[randint(0, len(possible_paths) - 1)]
+        for transform in (hflip, vflip, rotate):
+            if randint(0, 1):
+                puzzle_path = map(transform, puzzle_path)
+        for index, character in zip(puzzle_path, puzzle_word.upper()):
+            slots[index] = character
+    grid = ''.join(slots)
+    return grid
+
+
+def hflip(index):
+    x = index % SIZE
+    x_flip = SIZE - 1 - x
+    index_flip = index - x + x_flip
+    return index_flip
+
+
+def vflip(index):
+    y = index // SIZE
+    y_flip = SIZE - 1 - y
+    index_flip = SIZE * y_flip + (index % SIZE)
+    return index_flip
+
+
+def rotate(index):
+    y = index // SIZE
+    x = index % SIZE
+    new_y = SIZE - 1 - x
+    new_x = y
+    return new_y * SIZE + new_x

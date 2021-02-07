@@ -57,9 +57,12 @@ a:active {
   margin: 1em 0em;
   font-weight: bold;
 }
-#newGameButton {
+#new-game-button {
   padding: 1em;
   background-color: #eee;
+}
+#new-game-button, #puzzleWord, #puzzleHint {
+  width: 12em;
 }
 #scores-list div {
   padding: 0.5em;

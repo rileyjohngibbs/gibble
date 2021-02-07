@@ -12,6 +12,8 @@ class Game(db.Model):
     grid = db.Column(db.String(16))
     created_at = db.Column(db.DateTime, default=dt.datetime.now)
     game_players = db.relationship('GamePlayer', lazy=True, backref='game')
+    puzzle_word = db.Column(db.String(16))
+    puzzle_hint = db.Column(db.String(256))
 
     def __repr__(self):
         return f'<Game {self.id}: {self.grid[:8]}...>'
