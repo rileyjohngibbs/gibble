@@ -13,6 +13,7 @@
       <h2>Results: Game <span id="game-id"></span></h2>
     </div>
     <div id="board" class="section"></div>
+    <div id="puzzle-info"></div>
     <div class="section">
       <h2>Scores</h2>
       <div id="scores-list"></div>
@@ -94,6 +95,21 @@
           const boardDiv = document.querySelector('#board')
           boardDiv.innerHTML = ''
           boardDiv.appendChild(game.renderBoard())
+          if (response.puzzle_word) {
+            const puzzleDiv = document.querySelector('#puzzle-info')
+            puzzleDiv.className = 'section'
+            const puzzleWord = document.createElement('p')
+            puzzleWord.innerText = `Puzzle word: ${response.puzzle_word}`
+            puzzleDiv.appendChild(puzzleWord)
+            const puzzleHint = document.createElement('p')
+            const hintText = response.played
+              ? response.puzzle_hint
+                ? `"${response.puzzle_hint}"`
+                : '(no hint given)'
+              : response.puzzle_word
+            puzzleHint.innerText = `Hint: ${hintText}`
+            puzzleDiv.appendChild(puzzleHint)
+          }
           const scoresDiv = document.querySelector('#scores-list')
           scoresDiv.innerHTML = ''
           const scoreListings = response.users.forEach((user) => {

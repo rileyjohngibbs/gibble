@@ -1,14 +1,15 @@
 import datetime as dt
 from os import getenv
-from random import randint, shuffle
 
 from flask import Flask, g, jsonify, redirect, request, send_from_directory
 
 from gibble.helpers import (
+    SIZE,
     game_duration,
     make_grid_array,
     score_game,
     score_word,
+    generate_grid,
 )
 
 def create_app():
@@ -28,7 +29,10 @@ def create_app():
         if user_id is not None:
             user = db.session.query(User).filter_by(id=user_id).first()
             if user is None:
-                return {'error': 'Unknown user_id'}, 401
+                response = jsonify({'error': 'Unknown user; please reload'})
+                response.set_cookie('user_id', '', expires=0)
+                response.set_cookie('username', '', expires=0)
+                return response, 401
         else:
             user = None
         g.user = user
@@ -39,7 +43,9 @@ def create_app():
 
     @app.route('/login', methods=['POST'])
     def login():
-        username = request.json.get('username')
+        username = request.json.get('username').strip()
+        if not username:
+            return {'error': 'No username provided'}, 401
         user = db.session.query(User).filter_by(username=username).first()
         if user is None:
             user = User(username=username)
@@ -53,30 +59,19 @@ def create_app():
 
     @app.route('/games', methods=['POST'])
     def create_game():
+        puzzle_word = (request.json.get('puzzle_word') or '').strip()
+        puzzle_hint = (request.json.get('puzzle_hint') or '').strip()
+        if len(puzzle_word) > SIZE**2:
+            return {'error': 'puzzle_word is too long'}, 400
+        grid = generate_grid(puzzle_word)
         dice_slots = list(range(16))
-        shuffle(dice_slots)
-        faces = [randint(0, 5) for _ in range(16)]
-        dice = [
-            'AACIOT',
-            'ABILTY',
-            'ABJMOQ',
-            'ACDEMP',
-            'ACELRS',
-            'ADENVZ',
-            'AHMORS',
-            'BIFORX',
-            'DENOSW',
-            'DKNOTU',
-            'EEFHIY',
-            'EGKLUY',
-            'EGINTV',
-            'EHINPS',
-            'ELPSTU',
-            'GILRUW',
-        ]
-        grid = ''.join(dice[d][f] for d, f in zip(dice_slots, faces))
         game = Game(grid=grid)
         game_player = GamePlayer(user_id=g.user.id)
+        if puzzle_word:
+            game.puzzle_word = puzzle_word
+            game.puzzle_hint = puzzle_hint
+            delta = game_duration(buffer_=True)
+            game_player.started_at = dt.datetime.now() - delta
         game.game_players.append(game_player)
         db.session.add(game)
         db.session.commit()
@@ -137,10 +132,14 @@ def create_app():
             (game_duration() - time_elapsed).total_seconds()
         )
         words = [word.word for word in game_player.words]
+        puzzle_word = '*' * len(game_player.game.puzzle_word or '')
+        puzzle_hint = game_player.game.puzzle_hint
         return {
             'grid': grid,
             'seconds_remaining': max(seconds_remaining, 0),
             'words_played': words,
+            'puzzle_word': puzzle_word,
+            'puzzle_hint': puzzle_hint,
         }
 
     @app.route('/games/<int:game_id>', methods=['GET'])
@@ -188,9 +187,21 @@ def create_app():
             and make_grid_array(game.grid)
             or make_grid_array('?' * 16)
         )
+        puzzle_word = (
+            has_played
+            and game.puzzle_word
+            or '*' * len(game.puzzle_word or '')
+        )
+        puzzle_hint = (
+            has_played
+            and game.puzzle_hint
+            or None
+        )
         return {
             'id': game.id,
             'grid': grid,
+            'puzzle_word': puzzle_word,
+            'puzzle_hint': puzzle_hint,
             'played': has_played,
             'created_at': game.created_at,
             'users': users,
