@@ -4,13 +4,15 @@
     <title>Gibble</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="base.css?v=20210104">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="base.css?v=20220525">
   </head>
   <body>
+
     <div id="title" class="section">
       <h1 class="app-title"><a href="/menu.html">Gibble</a></h1>
     </div>
+
     <div id="login" class="section">
       <div id="login-status">
         User: <span id="usernameDisplay">(not logged in)</span>
@@ -20,15 +22,19 @@
         <button id="loginButton" onclick="setUser()">Login</button>
       </div>
     </div>
+
     <div id="newGameDiv" class="section">
       <button id="new-game-button" onclick="newGame()">Start New Game</button><br />
-      <input type="checkbox" id="isPuzzle"> Puzzle board<br />
-      <input type="text" id="puzzleWord" placeholder="Puzzle word"><br />
-      <input type="text" id="puzzleHint" placeholder="Puzzle hint">
+      <div><input type="checkbox" id="isPuzzle"> Puzzle board</div>
+      <div><input type="text" id="puzzleWord" placeholder="Puzzle word"></div>
+      <div><input type="text" id="puzzleHint" placeholder="Puzzle hint"></div>
     </div>
-    <div id="games">
+
+    <div id="games" class="section">
     </div>
-    <script src="./api.js"></script>
-    <script src="./menu.js?v=20210101"></script>
+
+    <script src="./api.js?v=20220525"></script>
+    <script src="./menu.js?v=20220525"></script>
+
   </body>
 </html>
