@@ -60,7 +60,12 @@ class Game {
       row.forEach((die) => {
         const dieDiv = document.createElement('div')
         dieDiv.className = 'die'
-        dieDiv.textContent = die == 'Q' ? 'Qu' : die
+
+        const dieText = document.createElement('div')
+        dieText.textContent = die == 'Q' ? 'Qu' : die
+        dieText.className = 'die-text'
+        dieDiv.appendChild(dieText)
+
         if (onClickFunc) {
           dieDiv.className += ' die-clickable'
           dieDiv.onclick = () => {

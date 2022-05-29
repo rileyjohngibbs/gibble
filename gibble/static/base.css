@@ -1,3 +1,7 @@
+:root {
+  --max-die-size: 72;
+  --section-margin: 16;
+}
 a:link {
   text-decoration: none;
 }
@@ -13,15 +17,39 @@ a:active {
 input {
   font-size: 1em;
 }
+.die-row {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: center;
+}
 .die {
-  height: 2em;
-  width: 2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: calc(var(--max-die-size) * 1px);
+  max-width: calc(var(--max-die-size) * 1px);
   text-align: center;
-  float: left;
+  flex: 1 1 100px;
   line-height: 2em;
-  border: 0.1em solid black;
-  margin: 0.1em;
+  border: 2px solid black;
+  margin: 2px;
   border-radius: 10%;
+}
+.die::before {
+  content: '';
+  padding-top: 100%;
+  display: block;
+}
+.die-text {
+  font-size: 36px;
+}
+@media only screen and (max-width: 354px) {
+  .die-text {
+    --max-size: 36;
+    --max-width: calc((var(--max-die-size) + 4) * 4 + 2 + var(--section-margin) * 2 + 16);
+    font-size: calc(0px + var(--max-size) * (100vw) / var(--max-width));
+  }
 }
 .die-clickable {
   cursor: pointer;
@@ -43,11 +71,8 @@ input {
   margin: 0.5em;
   border: 1px solid gray;
 }
-.die-row {
-  height: 2.4em;
-}
 .section {
-  margin: 2em 1em;
+  margin: calc(var(--section-margin) * 2px) calc(var(--section-margin) * 1px);
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -58,6 +83,10 @@ input {
 }
 #game-id-div {
   font-size: small;
+}
+#board {
+  display: flex;
+  flex-direction: column;
 }
 #games {
   display: flex;
