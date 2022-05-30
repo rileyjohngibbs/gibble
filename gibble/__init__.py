@@ -82,7 +82,6 @@ def create_app():
     def get_games():
         if g.user is None:
             return {"error": "Missing user_id"}, 401
-        game_ids = [gp.game_id for gp in g.user.game_players]
         games = (
             db.session.query(GamePlayer)
             .options(
@@ -93,7 +92,6 @@ def create_app():
             .filter(GamePlayer.user_id == g.user.id)
             .all()
         )
-        timelimit = dt.datetime.now() - game_duration()
         return {
             "games": [
                 {
@@ -204,11 +202,9 @@ def create_app():
     def challenge(game_id):
         if g.user is None:
             return {"error": "Missing user_id"}, 401
-        game_player = (
-            db.session.query(GamePlayer)
-            .filter_by(user_id=g.user.id, game_id=game_id)
-            .first_or_404()
-        )
+        db.session.query(GamePlayer).filter_by(
+            user_id=g.user.id, game_id=game_id
+        ).first_or_404()
         opponent_username = request.json.get("username").strip()
         if opponent_username is None:
             return {"error": "Missing username for opponent"}, 400
@@ -231,12 +227,9 @@ def create_app():
 
     @app.route("/games/<int:game_id>/players", methods=["GET"])
     def get_game_players(game_id):
-        game_player = (
-            db.session.query(GamePlayer)
-            .filter_by(game_id=game_id, user_id=g.user.id)
-            .filter(GamePlayer.started_at.isnot(None))
-            .first_or_404()
-        )
+        db.session.query(GamePlayer).filter_by(
+            game_id=game_id, user_id=g.user.id
+        ).filter(GamePlayer.started_at.isnot(None)).first_or_404()
         game_players = (
             db.session.query(User)
             .join(GamePlayer, GamePlayer.user_id == User.id)
@@ -349,12 +342,9 @@ def create_app():
 
     @app.route("/games/<int:game_id>/vetoes", methods=["GET"])
     def get_vetoes(game_id):
-        game_player = (
-            db.session.query(GamePlayer)
-            .filter_by(game_id=game_id, user_id=g.user.id)
-            .filter(GamePlayer.started_at.isnot(None))
-            .first_or_404()
-        )
+        db.session.query(GamePlayer).filter_by(
+            game_id=game_id, user_id=g.user.id
+        ).filter(GamePlayer.started_at.isnot(None)).first_or_404()
         vetoes = (
             db.session.query(WordRejection.word, GamePlayer.user_id)
             .join(GamePlayer, GamePlayer.id == WordRejection.game_player_id)
