@@ -308,7 +308,9 @@ def create_app():
         )
         words_response: list[dict]
         if complete:
-            words_response = [{"word": word.word, "user_id": word.user_id} for word in words]
+            words_response = [
+                {"word": word.word, "user_id": word.user_id} for word in words
+            ]
         else:
             words_response = []
         return {
