@@ -17,59 +17,8 @@ a:active {
 input {
   font-size: 1em;
 }
-.die-row {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  justify-content: center;
-}
-.die {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  max-height: calc(var(--max-die-size) * 1px);
-  max-width: calc(var(--max-die-size) * 1px);
-  text-align: center;
-  flex: 1 1 100px;
-  line-height: 2em;
-  border: 2px solid black;
-  margin: 2px;
-  border-radius: 10%;
-}
-.die::before {
-  content: '';
-  padding-top: 100%;
-  display: block;
-}
-.die-text {
-  font-size: 36px;
-}
-@media only screen and (max-width: 354px) {
-  .die-text {
-    --max-size: 36;
-    --max-width: calc((var(--max-die-size) + 4) * 4 + 2 + var(--section-margin) * 2 + 16);
-    font-size: calc(0px + var(--max-size) * (100vw) / var(--max-width));
-  }
-}
-.die-clickable {
-  cursor: pointer;
-}
 .disabled {
   color: grey;
-}
-.found-word {
-  height: 2em;
-  line-height: 2em;
-  margin: 0.5em;
-  text-align: center;
-}
-.game-date {
-  font-size: small;
-}
-.game-row {
-  padding: 1em;
-  margin: 0.5em;
-  border: 1px solid gray;
 }
 .section {
   margin: calc(var(--section-margin) * 2px) calc(var(--section-margin) * 1px);
@@ -77,48 +26,4 @@ input {
   justify-content: center;
   flex-direction: column;
   align-items: center;
-}
-.veto-button {
-  margin: 0em 0.5em;
-}
-#game-id-div {
-  font-size: small;
-}
-#board {
-  display: flex;
-  flex-direction: column;
-}
-#games {
-  display: flex;
-  flex-flow: row wrap;
-}
-#login-status {
-  margin: 1em 0em;
-  font-weight: bold;
-}
-#new-game-button {
-  padding: 1em;
-  background-color: #eee;
-}
-#new-game-button, #puzzleWord, #puzzleHint {
-  width: 12em;
-}
-#scores-list div {
-  padding: 0.5em;
-}
-#timer {
-  margin: 1em 0em;
-}
-#words-table td {
-  padding: 0.5em;
-  max-width: 10em;
-}
-#words-table th {
-  padding: 0.5em;
-  text-align: left;
-}
-#wordlist {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }

@@ -1,0 +1,16 @@
+@import "board.css";
+@import "base.css";
+
+#scores-list div {
+    padding: 0.5em;
+}
+
+#words-table td {
+    padding: 0.5em;
+    max-width: 10em;
+}
+
+#words-table th {
+    padding: 0.5em;
+    text-align: left;
+}

@@ -1,0 +1,32 @@
+@import "base.css";
+
+.game-date {
+    font-size: small;
+}
+
+.game-row {
+    padding: 1em;
+    margin: 0.5em;
+    border: 1px solid gray;
+}
+
+#games {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+#login-status {
+    margin: 1em 0em;
+    font-weight: bold;
+}
+
+#new-game-button {
+    padding: 1em;
+    background-color: #eee;
+}
+
+#new-game-button,
+#puzzleWord,
+#puzzleHint {
+    width: 12em;
+}

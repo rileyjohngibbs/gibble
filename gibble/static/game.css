@@ -1,0 +1,23 @@
+@import "board.css";
+@import "base.css";
+
+.found-word {
+  height: 2em;
+  line-height: 2em;
+  margin: 0.5em;
+  text-align: center;
+}
+
+#game-id-div {
+  font-size: small;
+}
+
+#timer {
+  margin: 1em 0em;
+}
+
+#wordlist {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}

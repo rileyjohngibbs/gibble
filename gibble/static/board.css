@@ -1,0 +1,47 @@
+.die-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+}
+
+.die {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-height: calc(var(--max-die-size) * 1px);
+    max-width: calc(var(--max-die-size) * 1px);
+    text-align: center;
+    flex: 1 1 100px;
+    line-height: 2em;
+    border: 2px solid black;
+    margin: 2px;
+    border-radius: 10%;
+}
+
+.die::before {
+    content: '';
+    padding-top: 100%;
+    display: block;
+}
+
+.die-text {
+    font-size: 36px;
+}
+
+@media only screen and (max-width: 354px) {
+    .die-text {
+        --max-size: 36;
+        --max-width: calc((var(--max-die-size) + 4) * 4 + 2 + var(--section-margin) * 2 + 16);
+        font-size: calc(0px + var(--max-size) * (100vw) / var(--max-width));
+    }
+}
+
+.die-clickable {
+    cursor: pointer;
+}
+
+#board {
+    display: flex;
+    flex-direction: column;
+}
