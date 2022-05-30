@@ -12,57 +12,59 @@ from gibble.helpers import (
     generate_grid,
 )
 
+
 def create_app():
-    app = Flask(__name__, static_url_path='')
-    app.config['SQLALCHEMY_DATABASE_URI'] = getenv(
-        'DATABASE_URL',
-        'sqlite:///gibble.db',
+    app = Flask(__name__, static_url_path="")
+    app.config["SQLALCHEMY_DATABASE_URI"] = getenv(
+        "DATABASE_URL",
+        "sqlite:///gibble.db",
     )
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     from gibble.models import Game, GamePlayer, User, Word, WordRejection, db
+
     db.init_app(app)
 
     @app.before_request
     def authenticate():
-        user_id = request.cookies.get('user_id')
+        user_id = request.cookies.get("user_id")
         if user_id is not None:
             user = db.session.query(User).filter_by(id=user_id).first()
             if user is None:
-                response = jsonify({'error': 'Unknown user; please reload'})
-                response.set_cookie('user_id', '', expires=0)
-                response.set_cookie('username', '', expires=0)
+                response = jsonify({"error": "Unknown user; please reload"})
+                response.set_cookie("user_id", "", expires=0)
+                response.set_cookie("username", "", expires=0)
                 return response, 401
         else:
             user = None
         g.user = user
 
-    @app.route('/', methods=['GET'])
+    @app.route("/", methods=["GET"])
     def reroute():
-        return redirect('/menu.html', code=302)
+        return redirect("/menu.html", code=302)
 
-    @app.route('/login', methods=['POST'])
+    @app.route("/login", methods=["POST"])
     def login():
-        username = request.json.get('username').strip()
+        username = request.json.get("username").strip()
         if not username:
-            return {'error': 'No username provided'}, 401
+            return {"error": "No username provided"}, 401
         user = db.session.query(User).filter_by(username=username).first()
         if user is None:
             user = User(username=username)
             db.session.add(user)
             db.session.commit()
         user_id = str(user.id)
-        response = jsonify({'user_id': user_id, 'username': username})
-        response.set_cookie('user_id', user_id)
-        response.set_cookie('username', username)
+        response = jsonify({"user_id": user_id, "username": username})
+        response.set_cookie("user_id", user_id)
+        response.set_cookie("username", username)
         return response
 
-    @app.route('/games', methods=['POST'])
+    @app.route("/games", methods=["POST"])
     def create_game():
-        puzzle_word = (request.json.get('puzzle_word') or '').strip().replace(' ', '')
-        puzzle_hint = (request.json.get('puzzle_hint') or '').strip()
+        puzzle_word = (request.json.get("puzzle_word") or "").strip().replace(" ", "")
+        puzzle_hint = (request.json.get("puzzle_hint") or "").strip()
         if len(puzzle_word) > SIZE**2:
-            return {'error': 'puzzle_word is too long'}, 400
+            return {"error": "puzzle_word is too long"}, 400
         grid = generate_grid(puzzle_word)
         game = Game(grid=grid)
         game_player = GamePlayer(user_id=g.user.id)
@@ -74,12 +76,12 @@ def create_app():
         game.game_players.append(game_player)
         db.session.add(game)
         db.session.commit()
-        return {'id': game.id}
+        return {"id": game.id}
 
-    @app.route('/games', methods=['GET'])
+    @app.route("/games", methods=["GET"])
     def get_games():
         if g.user is None:
-            return {'error': 'Missing user_id'}, 401
+            return {"error": "Missing user_id"}, 401
         game_ids = [gp.game_id for gp in g.user.game_players]
         games = (
             db.session.query(GamePlayer)
@@ -93,16 +95,16 @@ def create_app():
         )
         timelimit = dt.datetime.now() - game_duration()
         return {
-            'games': [
+            "games": [
                 {
-                    'id': gp.game.id,
-                    'created_at': gp.game.created_at,
-                    'played': gp.has_played,
-                    'players': [
+                    "id": gp.game.id,
+                    "created_at": gp.game.created_at,
+                    "played": gp.has_played,
+                    "players": [
                         {
-                            'id': gp_.user.id,
-                            'username': gp_.user.username,
-                            'played': gp_.has_played,
+                            "id": gp_.user.id,
+                            "username": gp_.user.username,
+                            "played": gp_.has_played,
                         }
                         for gp_ in gp.game.game_players
                     ],
@@ -111,10 +113,10 @@ def create_app():
             ],
         }
 
-    @app.route('/games/<int:game_id>', methods=['POST'])
+    @app.route("/games/<int:game_id>", methods=["POST"])
     def join_game(game_id):
         if g.user is None:
-            return {'error': 'Missing user_id'}, 401
+            return {"error": "Missing user_id"}, 401
         game_player = (
             db.session.query(GamePlayer)
             .filter_by(user_id=g.user.id, game_id=game_id)
@@ -127,24 +129,22 @@ def create_app():
             game_player.started_at = now
             db.session.commit()
         time_elapsed = now - game_player.started_at
-        seconds_remaining = int(
-            (game_duration() - time_elapsed).total_seconds()
-        )
+        seconds_remaining = int((game_duration() - time_elapsed).total_seconds())
         words = [word.word for word in game_player.words]
-        puzzle_word = '*' * len(game_player.game.puzzle_word or '')
+        puzzle_word = "*" * len(game_player.game.puzzle_word or "")
         puzzle_hint = game_player.game.puzzle_hint
         return {
-            'grid': grid,
-            'seconds_remaining': max(seconds_remaining, 0),
-            'words_played': words,
-            'puzzle_word': puzzle_word,
-            'puzzle_hint': puzzle_hint,
+            "grid": grid,
+            "seconds_remaining": max(seconds_remaining, 0),
+            "words_played": words,
+            "puzzle_word": puzzle_word,
+            "puzzle_hint": puzzle_hint,
         }
 
-    @app.route('/games/<int:game_id>', methods=['GET'])
+    @app.route("/games/<int:game_id>", methods=["GET"])
     def get_single_game(game_id):
         if g.user is None:
-            return {'error': 'Missing user_id'}, 401
+            return {"error": "Missing user_id"}, 401
         game_player = (
             db.session.query(GamePlayer)
             .filter_by(user_id=g.user.id, game_id=game_id)
@@ -157,74 +157,63 @@ def create_app():
             + (base_join.joinedload(GamePlayer.words),)
             + (base_join.joinedload(GamePlayer.word_rejections),)
         )
-        game = (
-            db.session.query(Game).options(*joins)
-            .filter(Game.id == game_id)
-            .first()
-        )
+        game = db.session.query(Game).options(*joins).filter(Game.id == game_id).first()
         users = [
-            {'id': gp.user.id, 'username': gp.user.username}
-            for gp in game.game_players
+            {"id": gp.user.id, "username": gp.user.username} for gp in game.game_players
         ]
-        words = has_played and [
-            {
-                'word': word.word,
-                'user_id': gp.user.id,
-                'score': score_word(word.word),
-            }
-            for gp in game.game_players
-            for word in gp.words
-        ] or []
-        vetoes = has_played and [
-            {'word': rejection.word, 'user_id': gp.user.id}
-            for gp in game.game_players
-            for rejection in gp.word_rejections
-        ] or []
+        words: list[dict]
+        vetoes: list[dict]
+        if has_played:
+            words = [
+                {
+                    "word": word.word,
+                    "user_id": gp.user.id,
+                    "score": score_word(word.word),
+                }
+                for gp in game.game_players
+                for word in gp.words
+            ]
+            vetoes = [
+                {"word": rejection.word, "user_id": gp.user.id}
+                for gp in game.game_players
+                for rejection in gp.word_rejections
+            ]
+        else:
+            words = []
+            vetoes = []
         player_scores = score_game(words, vetoes)
-        grid = (
-            has_played
-            and make_grid_array(game.grid)
-            or make_grid_array('?' * 16)
-        )
+        grid = has_played and make_grid_array(game.grid) or make_grid_array("?" * 16)
         puzzle_word = (
-            has_played
-            and game.puzzle_word
-            or '*' * len(game.puzzle_word or '')
+            has_played and game.puzzle_word or "*" * len(game.puzzle_word or "")
         )
-        puzzle_hint = (
-            has_played
-            and game.puzzle_hint
-            or None
-        )
+        puzzle_hint = has_played and game.puzzle_hint or None
         return {
-            'id': game.id,
-            'grid': grid,
-            'puzzle_word': puzzle_word,
-            'puzzle_hint': puzzle_hint,
-            'played': has_played,
-            'created_at': game.created_at,
-            'users': users,
-            'words': words,
-            'scores': player_scores,
-            'vetoes': vetoes,
+            "id": game.id,
+            "grid": grid,
+            "puzzle_word": puzzle_word,
+            "puzzle_hint": puzzle_hint,
+            "played": has_played,
+            "created_at": game.created_at,
+            "users": users,
+            "words": words,
+            "scores": player_scores,
+            "vetoes": vetoes,
         }
 
-    @app.route('/games/<int:game_id>/players', methods=['POST'])
+    @app.route("/games/<int:game_id>/players", methods=["POST"])
     def challenge(game_id):
         if g.user is None:
-            return {'error': 'Missing user_id'}, 401
+            return {"error": "Missing user_id"}, 401
         game_player = (
             db.session.query(GamePlayer)
             .filter_by(user_id=g.user.id, game_id=game_id)
             .first_or_404()
         )
-        opponent_username = request.json.get('username').strip()
+        opponent_username = request.json.get("username").strip()
         if opponent_username is None:
-            return {'error': 'Missing username for opponent'}, 400
+            return {"error": "Missing username for opponent"}, 400
         opponent = (
-            db.session.query(User)
-            .filter_by(username=opponent_username)
-            .first_or_404()
+            db.session.query(User).filter_by(username=opponent_username).first_or_404()
         )
         challenge_exists = (
             db.session.query(GamePlayer)
@@ -238,9 +227,9 @@ def create_app():
             )
             db.session.add(opponent_game_player)
             db.session.commit()
-        return {'id': opponent.id, 'username': opponent.username}
+        return {"id": opponent.id, "username": opponent.username}
 
-    @app.route('/games/<int:game_id>/players', methods=['GET'])
+    @app.route("/games/<int:game_id>/players", methods=["GET"])
     def get_game_players(game_id):
         game_player = (
             db.session.query(GamePlayer)
@@ -254,31 +243,34 @@ def create_app():
             .filter(GamePlayer.game_id == game_id)
             .all()
         )
-        return {'players': [
-            {'id': player.id, 'username': player.username}
-            for player in game_players
-        ]}
+        return {
+            "players": [
+                {"id": player.id, "username": player.username}
+                for player in game_players
+            ]
+        }
 
-    @app.route('/games/<int:game_id>/words', methods=['POST'])
+    @app.route("/games/<int:game_id>/words", methods=["POST"])
     def submit_words(game_id):
         TIMELIMIT = game_duration(buffer_=True)
-        words = request.json.get('words')
+        words = request.json.get("words")
         game_player = (
             db.session.query(GamePlayer)
             .filter(
-                GamePlayer.game_id==game_id,
-                GamePlayer.user_id==g.user.id,
+                GamePlayer.game_id == game_id,
+                GamePlayer.user_id == g.user.id,
                 GamePlayer.started_at.isnot(None),
             )
             .first_or_404()
         )
         if dt.datetime.now() - game_player.started_at > TIMELIMIT:
-            return {'error': 'Timer expired'}, 400
-        existing_words = {word.word for word in (
-            db.session.query(Word)
-            .filter_by(game_player_id=game_player.id)
-            .all()
-        )}
+            return {"error": "Timer expired"}, 400
+        existing_words = {
+            word.word
+            for word in (
+                db.session.query(Word).filter_by(game_player_id=game_player.id).all()
+            )
+        }
         db_words = [
             Word(word=word.upper(), game_player_id=game_player.id)
             for word in words
@@ -288,7 +280,7 @@ def create_app():
         db.session.commit()
         return {}, 201
 
-    @app.route('/games/<int:game_id>/words', methods=['GET'])
+    @app.route("/games/<int:game_id>/words", methods=["GET"])
     def get_words(game_id):
         game_player = (
             db.session.query(GamePlayer)
@@ -314,18 +306,17 @@ def create_app():
             .filter(User.id.in_(word.user_id for word in words))
             .all()
         )
+        words_response: list[dict]
+        if complete:
+            words_response = [{"word": word.word, "user_id": word.user_id} for word in words]
+        else:
+            words_response = []
         return {
-            'words': complete and [
-                {'word': word.word, 'user_id': word.user_id}
-                for word in words
-            ] or [],
-            'users': [
-                {'id': user.id, 'username': user.username}
-                for user in users
-            ],
+            "words": words_response,
+            "users": [{"id": user.id, "username": user.username} for user in users],
         }
 
-    @app.route('/games/<int:game_id>/vetoes', methods=['POST'])
+    @app.route("/games/<int:game_id>/vetoes", methods=["POST"])
     def veto_word(game_id):
         game_player = (
             db.session.query(GamePlayer)
@@ -333,9 +324,9 @@ def create_app():
             .filter(GamePlayer.started_at.isnot(None))
             .first_or_404()
         )
-        word = request.json.get('word')
+        word = request.json.get("word")
         existing_veto = db.session.query(WordRejection).get(
-            {'word': word, 'game_player_id': game_player.id},
+            {"word": word, "game_player_id": game_player.id},
         )
         if existing_veto is None:
             veto = WordRejection(word=word, game_player_id=game_player.id)
@@ -350,12 +341,11 @@ def create_app():
             .filter(GamePlayer.game_id == game_id)
             .all()
         )
-        return {'vetoes': [
-            {'word': veto.word, 'user_id': veto.user_id}
-            for veto in vetoes
-        ]}
+        return {
+            "vetoes": [{"word": veto.word, "user_id": veto.user_id} for veto in vetoes]
+        }
 
-    @app.route('/games/<int:game_id>/vetoes', methods=['GET'])
+    @app.route("/games/<int:game_id>/vetoes", methods=["GET"])
     def get_vetoes(game_id):
         game_player = (
             db.session.query(GamePlayer)
@@ -369,18 +359,17 @@ def create_app():
             .filter(GamePlayer.game_id == game_id)
             .all()
         )
-        return {'vetoes': [
-            {'word': veto.word, 'user_id': veto.user_id}
-            for veto in vetoes
-        ]}
+        return {
+            "vetoes": [{"word": veto.word, "user_id": veto.user_id} for veto in vetoes]
+        }
 
-    @app.cli.command('init-db')
+    @app.cli.command("init-db")
     def init_db():
         """Create the database tables."""
         with app.app_context():
             db.create_all()
 
-    @app.cli.command('reset-db')
+    @app.cli.command("reset-db")
     def reset_db():
         """Drop and recreate the database tables."""
         with app.app_context():
