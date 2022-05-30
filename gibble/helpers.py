@@ -105,19 +105,27 @@ def extend_path(path: List[int]) -> List[List[int]]:
     ]
 
 
-def get_possible_paths(word_length) -> List[List[int]]:
-    paths = [  # TODO: Make this uniform for SIZE % 2 == 1
-        [y * SIZE + x]
-        for y in range(int(SIZE / 2 + 0.5))
-        for x in range(int(SIZE / 2 + 0.5))
-    ]
-    for _ in range(word_length - 1):
-        paths = [
-            extension
-            for path in paths
-            for extension in extend_path(path)
-        ]
-    return paths
+def get_one_path(word_length: int) -> list[int]:
+    path = []
+    frontiers: list[list[int]] = []
+    frontiers.append([
+        y * SIZE + x
+        for y in range(int(SIZE))
+        for x in range(int(SIZE))
+    ])
+    while len(path) < word_length:
+        while not frontiers[-1]:
+            frontiers.pop()
+            if not frontiers:
+                raise ValueError(f"Cannot create path of length {word_length}")
+            path.pop()
+        new_tile_index = randint(0, len(frontiers[-1]) - 1)
+        path.append(frontiers[-1].pop(new_tile_index))
+        frontiers.append([
+            candidate for candidate in get_neighbor_indices(path[-1])
+            if candidate not in path
+        ])
+    return path
 
 
 def generate_grid(puzzle_word: Optional[str]) -> str:
@@ -126,34 +134,8 @@ def generate_grid(puzzle_word: Optional[str]) -> str:
     faces = [die[randint(0, 5)] for die in DICE]
     slots = [faces[slot] for slot in dice_slots]
     if puzzle_word:
-        possible_paths = get_possible_paths(len(puzzle_word.strip()))
-        puzzle_path = possible_paths[randint(0, len(possible_paths) - 1)]
-        for transform in (hflip, vflip, rotate):
-            if randint(0, 1):
-                puzzle_path = map(transform, puzzle_path)
+        puzzle_path = get_one_path(len(puzzle_word))
         for index, character in zip(puzzle_path, puzzle_word.upper()):
             slots[index] = character
     grid = ''.join(slots)
     return grid
-
-
-def hflip(index):
-    x = index % SIZE
-    x_flip = SIZE - 1 - x
-    index_flip = index - x + x_flip
-    return index_flip
-
-
-def vflip(index):
-    y = index // SIZE
-    y_flip = SIZE - 1 - y
-    index_flip = SIZE * y_flip + (index % SIZE)
-    return index_flip
-
-
-def rotate(index):
-    y = index // SIZE
-    x = index % SIZE
-    new_y = SIZE - 1 - x
-    new_x = y
-    return new_y * SIZE + new_x

@@ -1,7 +1,7 @@
 import datetime as dt
 from os import getenv
 
-from flask import Flask, g, jsonify, redirect, request, send_from_directory
+from flask import Flask, g, jsonify, redirect, request
 
 from gibble.helpers import (
     SIZE,
@@ -59,12 +59,11 @@ def create_app():
 
     @app.route('/games', methods=['POST'])
     def create_game():
-        puzzle_word = (request.json.get('puzzle_word') or '').strip()
+        puzzle_word = (request.json.get('puzzle_word') or '').strip().replace(' ', '')
         puzzle_hint = (request.json.get('puzzle_hint') or '').strip()
         if len(puzzle_word) > SIZE**2:
             return {'error': 'puzzle_word is too long'}, 400
         grid = generate_grid(puzzle_word)
-        dice_slots = list(range(16))
         game = Game(grid=grid)
         game_player = GamePlayer(user_id=g.user.id)
         if puzzle_word:
