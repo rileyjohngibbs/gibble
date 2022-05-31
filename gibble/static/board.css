@@ -14,8 +14,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    max-height: calc(var(--max-die-size) * 1px);
-    max-width: calc(var(--max-die-size) * 1px);
+    max-height: min(calc(var(--max-die-size) * 1px), 10vh, 20vw);
+    max-width: min(calc(var(--max-die-size) * 1px), 10vh, 20vw);
     text-align: center;
     flex: 1 1 100px;
     line-height: 2em;
@@ -31,14 +31,7 @@
 }
 
 .die-text {
-    font-size: calc(var(--max-die-font-size) * 1px);
-}
-
-@media only screen and (max-width: 354px) {
-    .die-text {
-        --max-width: calc((var(--max-die-size) + 4) * 4 + 2 + var(--section-margin) * 2 + 16);
-        font-size: calc(0px + var(--max-die-font-size) * (100vw) / var(--max-width));
-    }
+    font-size: min(calc(var(--max-die-font-size) * 1px), 5vh, 10vw);
 }
 
 .die-clickable {
