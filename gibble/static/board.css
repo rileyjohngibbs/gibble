@@ -1,3 +1,8 @@
+:root {
+    --max-die-size: 72;
+    --max-die-font-size: 36;
+}
+
 .die-row {
     display: flex;
     flex-direction: row;
@@ -26,14 +31,13 @@
 }
 
 .die-text {
-    font-size: 36px;
+    font-size: calc(var(--max-die-font-size) * 1px);
 }
 
 @media only screen and (max-width: 354px) {
     .die-text {
-        --max-size: 36;
         --max-width: calc((var(--max-die-size) + 4) * 4 + 2 + var(--section-margin) * 2 + 16);
-        font-size: calc(0px + var(--max-size) * (100vw) / var(--max-width));
+        font-size: calc(0px + var(--max-die-font-size) * (100vw) / var(--max-width));
     }
 }
 
