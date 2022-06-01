@@ -16,8 +16,12 @@
     <div id="play-area">
       <div id="board"></div>
       <div id="entry">
-        <input type="text" id="wordentry" onkeypress="entryKey()">
-        <button onclick="submit()">Submit</button>
+        <div id="wordentry-wrap">
+          <div id="wordentry"></div>
+        </div>
+        <div id="submit-wrap">
+          <button onclick="submit()" id="submit-button">Submit</button>
+        </div>
       </div>
       <div id="timer">
         Time remaining: <span id="timer-value"></span>
@@ -28,6 +32,7 @@
       <div id="puzzleInfo"></div>
       <div id="wordlist"></div>
     </div>
+    <div id="keyboard"></div>
     <script>
       const wordEntry = document.querySelector('#wordentry');
       const wordList = document.querySelector('#wordlist');
@@ -41,17 +46,29 @@
               ele.setAttribute('disabled', true)
             }
             client.submitWords(gameId, game.words, () => {
-              setTimeout(() => { window.location.href = `results.html?gameId=${gameId}` }, 3000)
+              const noRedirect = new URL(window.location.href).searchParams.get('noRedirect')
+              if (!noRedirect) {
+                setTimeout(() => { window.location.href = `results.html?gameId=${gameId}` }, 3000)
+              }
             })
-          }, apiGame.seconds_remaining * 1000);
+          }, apiGame.seconds_remaining * 1000, wordEntry);
+
+          document.onkeydown = (event) => {
+            const key = event.key.toUpperCase()
+            if (key.match(/^[A-Z]$/)) {
+              game.addLetter(key)
+            } else if (key === "BACKSPACE" || key === "DELETE") {
+              game.deleteLetter()
+            } else if (key === "ENTER") {
+              submit()
+            }
+          }
+
           game.board.grid = apiGame.grid;
-          document.querySelector('#board').appendChild(game.renderBoard(
-            (die) => wordEntry.value += die
-          ));
+          document.querySelector('#board').appendChild(game.renderBoard());
           document.querySelector('#game-id-div').innerHTML = `Game ${gameId}`;
           startTimer(apiGame.seconds_remaining)
           apiGame.words_played.forEach(word => addWordToList(word))
-          wordEntry.focus();
           if (apiGame.puzzle_word) {
             const puzzleInfoDiv = document.querySelector('#puzzleInfo')
             const wordInfo = document.createElement('p')
@@ -81,16 +98,17 @@
       }
 
       const submit = () => {
-        const word = wordEntry.value.toUpperCase().replaceAll(' ', '');
+        const word = game.currentWord
         const valid = game.submitWord(word);
         if (valid) {
           client.submitWords(urlGameId, [word], () => {})
           addWordToList(word)
         } else {
-          wordEntry.style.backgroundColor = 'pink'
-          setTimeout(() => wordEntry.style.backgroundColor = null, 250)
+          const submitButton = document.getElementById('submit-button')
+          submitButton.style.backgroundColor = 'pink'
+          setTimeout(() => submitButton.style.backgroundColor = null, 250)
         }
-        wordEntry.value = '';
+        game.clearCurrentWord()
       }
 
       const addWordToList = (word) => {
@@ -98,12 +116,6 @@
         newWordDiv.className = 'found-word';
         newWordDiv.innerText = word;
         wordList.prepend(newWordDiv);
-      }
-
-      const entryKey = () => {
-        if (event.key === 'Enter') {
-          submit()
-        }
       }
     </script>
   </body>

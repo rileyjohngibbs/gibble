@@ -31,11 +31,13 @@ if (!Array.prototype.equals) {
 
 class Game {
 
-  constructor(endCallback, timeRemaining) {
+  constructor(endCallback, timeRemaining, currentWordDiv) {
     this.duration = timeRemaining !== undefined ? timeRemaining : 3 * 60 * 1000
     const grid = Array(4).fill(0).map(() => Array(4).fill('A'))
     this.board = new Board(grid)
     this.words = []
+    this.currentWord = ''
+    this.currentWordDiv = currentWordDiv
     this.active = true
     this.endCallback = endCallback ? endCallback : () => {}
     setTimeout(() => {
@@ -52,7 +54,7 @@ class Game {
     return valid
   }
 
-  renderBoard(onClickFunc) {
+  renderBoard() {
     const fragment = document.createDocumentFragment()
     this.board.grid.forEach((row) => {
       const rowDiv = document.createElement('div')
@@ -66,7 +68,7 @@ class Game {
         dieText.className = 'die-text'
         dieDiv.appendChild(dieText)
 
-        if (onClickFunc) {
+        if (this.currentWordDiv) {
           dieDiv.className += ' die-clickable'
           dieDiv.onclick = () => {
             if (this.active) {
@@ -76,7 +78,7 @@ class Game {
                 dieDiv.style.transition = 'background .5s'
                 dieDiv.style.background = null
               }, 100)
-              onClickFunc(die)
+              this.addLetter(die)
             }
           }
         }
@@ -85,6 +87,27 @@ class Game {
       fragment.appendChild(rowDiv)
     })
     return fragment
+  }
+
+  renderCurrentWord() {
+    if (this.currentWordDiv) {
+      this.currentWordDiv.innerText = this.currentWord
+    }
+  }
+
+  clearCurrentWord() {
+    this.currentWord = ''
+    this.renderCurrentWord()
+  }
+
+  addLetter(letter) {
+    this.currentWord += letter.toUpperCase()
+    this.renderCurrentWord()
+  }
+
+  deleteLetter() {
+    this.currentWord = this.currentWord.slice(0, this.currentWord.length - 1)
+    this.renderCurrentWord()
   }
 }
 

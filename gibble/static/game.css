@@ -33,11 +33,43 @@
 
 #entry {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   padding: 16px;
+}
+
+#wordentry-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+#wordentry-wrap::before {
+  content: '';
+  padding-top: min(7vw, 42px);
+  display: block;
+}
+
+#wordentry {
+  text-align: center;
+  font-size: min(6vw, 36px);
+}
+
+#submit-button {
+  width: 80%;
+  max-width: 288px;
+}
+
+#submit-wrap {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 
 #timer {
   display: flex;
   justify-content: center;
+}
+
+#timer-value {
+  padding-left: 0.5em;
 }
